@@ -20,21 +20,17 @@ public class HttpGetAction extends AbstractHttpAction {
 	private final URI uri;
 	private HttpClient httpClient;
 	private String referer;
+	private HttpResponse response;
 
-	public HttpGetAction(HttpClient httpClient, URI uri) {
+	public HttpGetAction(TestContext cx, HttpClient httpClient, String path) {
+		super(cx);
 		this.httpClient = httpClient;
-		this.uri = uri;
+		this.uri = URI.create(path);
 	}
 	
-	public HttpGetAction(HttpClient httpClient, String string) {
-		this.httpClient = httpClient;
-		this.uri = URI.create(string);
-	}
-	
-	public HttpGetAction(HttpClient httpClient, String string, String referer) {
-		this.httpClient = httpClient;
+	public HttpGetAction(TestContext cx, HttpClient httpClient, String path, String referer) {
+		this(cx, httpClient, path);
 		this.referer = referer;
-		this.uri = URI.create(string);
 	}
 	
 	@Override
@@ -62,11 +58,12 @@ public class HttpGetAction extends AbstractHttpAction {
 		}
 		long totalRequestDuration = 0;
 		long reqStart = System.currentTimeMillis();
-		HttpResponse response = httpClient.execute(httpget);
+		response = httpClient.execute(httpget);
 		totalRequestDuration += System.currentTimeMillis() - reqStart;
 		int requestCount = 1;
 		while( (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302) && requestCount++ < MAX_REDIRECTS ) {
 			EntityUtils.consume(response.getEntity());
+			super.parseCookies(response);
 			uri = uri.resolve(response.getFirstHeader("Location").getValue());
 			HttpGet httpGet = new HttpGet(uri);
 			referer = uri.toString();
@@ -75,6 +72,7 @@ public class HttpGetAction extends AbstractHttpAction {
 			response = httpClient.execute(httpGet);
 			totalRequestDuration += System.currentTimeMillis() - reqStart;
 		}
+		super.parseCookies(response);
 		ret.setRequestCount(requestCount);
 		ret.setRequestDuration(totalRequestDuration);
 		ret.setStatus(response.getStatusLine().getStatusCode());
@@ -87,7 +85,13 @@ public class HttpGetAction extends AbstractHttpAction {
 		if (entity != null) {
 			String content = EntityUtils.toString(entity);
 		    ret.setContent(content);
-		    ret.setValid(validate(content));
+		    try {
+				ret.setValid(validate(content));
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				ret.setValid(e.toString());
+			}
 		}
 		return ret;
 	}
@@ -95,4 +99,9 @@ public class HttpGetAction extends AbstractHttpAction {
 	public URI getUri() {
 		return uri;
 	}
+	
+	protected HttpResponse getResponse() {
+		return response;
+	}
+
 }

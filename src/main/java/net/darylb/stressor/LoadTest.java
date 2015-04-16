@@ -1,7 +1,5 @@
 package net.darylb.stressor;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,15 +18,13 @@ public class LoadTest {
 	private final int numIterationsPerThread;
 	private final TestFactory testFactory;
 	private final int numThreads;
-	private final File outputDir;
-	private final String name;
+	private final TestContext cx;
 	
-	public LoadTest(String name, TestFactory testFactory, int numThreads, int numIterationsPerThread, File outputDir) {
-		this.name = name;
+	public LoadTest(TestContext cx, TestFactory testFactory, int numThreads, int numIterationsPerThread) {
+		this.cx = cx;
 		this.testFactory = testFactory;
 		this.numThreads = numThreads;
 		this.numIterationsPerThread = numIterationsPerThread;
-		this.outputDir = outputDir;
 		exec = Executors.newFixedThreadPool(numThreads);
 	}
 	
@@ -41,7 +37,7 @@ public class LoadTest {
 				tests.add(test);
 			}
 		}
-		TestResults ret = new TestResults(name, outputDir);
+		TestResults ret = new TestResults(cx);
 		ret.testStarting();
 		testResults = exec.invokeAll(tests);
 		exec.shutdown();
@@ -51,20 +47,14 @@ public class LoadTest {
 			log.warn("Non-graceful shutdown.");
 		}
 		ret.testEnded();
+		int n = 0;
 		for(Future<TestResult> result : testResults) {
 			TestResult thisResult = result.get();
 			//System.out.println(thisResult);
+			Util.writeFile(cx.getLogDir(), "result" + Integer.toString(n++) + ".txt", thisResult.toString());
 			ret.addResult(thisResult);
 		}
-		File f = new File(outputDir, "index.html");
-		FileOutputStream out;
-		try {
-			out = new FileOutputStream(f);
-			out.write(ret.toHtml().getBytes());
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Util.writeFile(cx.getLogDir(), "index.html", ret.toHtml());
 		testFactory.shutdown();
 		log.info("{} Results.", testResults.size());
 		return ret;

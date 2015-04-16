@@ -14,19 +14,20 @@ public abstract class Test implements Callable<TestResult> {
 		this.testResult = testResult;
 	}
 
-	public abstract Action getNextAction();
+	public abstract Action getNextAction(Action previousAction);
 
 	@Override
 	public TestResult call() {
 		TestResult testResult = new TestResult(getTestName());
-		Action action;
+		Action previousAction = null, action;
 		boolean lastActionPassed = true;
-		while(lastActionPassed && (action = getNextAction()) != null) {
+		while(lastActionPassed && (action = getNextAction(previousAction)) != null) {
 			long startTick = System.currentTimeMillis();
 			ActionResult actionResult = action.call();
 			actionResult.setDurationMs(System.currentTimeMillis() - startTick);
 			testResult.addActionResult(actionResult);
 			lastActionPassed = actionResult.isPassed();
+			previousAction = action;
 		}
 		onTestComplete();
 		// free up content memory

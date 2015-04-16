@@ -8,8 +8,8 @@ import org.apache.http.client.utils.URIBuilder;
 
 public abstract class AbstractSimpleHttpTest extends HttpGetAction {
 	
-	protected AbstractSimpleHttpTest(HttpClient httpClient, URI uri) {
-		super(httpClient, uri);
+	protected AbstractSimpleHttpTest(TestContext cx, HttpClient httpClient, String path) {
+		super(cx, httpClient, path);
 	}
 
 	private int uriPos = 0;

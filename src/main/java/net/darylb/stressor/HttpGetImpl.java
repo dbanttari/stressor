@@ -10,8 +10,8 @@ public class HttpGetImpl extends HttpGetAction {
 	private String expected;
 	private String url;
 	
-	public HttpGetImpl(HttpClient httpClient, String url, String expected) {
-		super(httpClient, url);
+	public HttpGetImpl(TestContext cx, HttpClient httpClient, String url, String expected) {
+		super(cx, httpClient, url);
 		this.url = url;
 		this.expected = expected;
 	}

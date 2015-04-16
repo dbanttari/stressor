@@ -1,6 +1,5 @@
 package net.darylb.stressor;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,14 +29,13 @@ public class TestResults {
 	private long totalActionDuration = 0;
 	private long requestCount = 0;
 	private long totalRequestDuration = 0;
-	private final File outputDir;
 	private LinkedList<String> errorPages = new LinkedList<String>();
-	private final String name;
 	private final String CRLF = System.getProperty("line.separator");
 
-	public TestResults(String name, File outputDir) {
-		this.name = name;
-		this.outputDir = outputDir;
+	private TestContext cx;
+
+	public TestResults(TestContext cx) {
+		this.cx = cx;
 	}
 
 	synchronized public void addResult(TestResult testResult) {
@@ -60,7 +58,7 @@ public class TestResults {
 				if(statusCode >= 500) {
 					String fn = "errorPage" + actionCount + "." + statusCode + ".html";
 					try {
-						OutputStream out = new FileOutputStream(outputDir + fn);
+						OutputStream out = new FileOutputStream(cx.getLogDir() + fn);
 						String foo = actionResult.getContent();
 						if(foo != null) {
 							out.write(foo.getBytes());
@@ -99,7 +97,7 @@ public class TestResults {
 	public String toString() {
 		double duration = endTick-startTick;
 		StringBuilder ret = new StringBuilder();
-		ret.append("Test Result: ").append(name).append(CRLF);
+		ret.append("Test Result: ").append(cx.getName()).append(CRLF);
 		ret.append("Test started: ").append((new Date(startTick)).toString()).append(CRLF);
 		ret.append("Test duration: ").append(NumberFormat.getInstance().format(duration)).append("ms").append(CRLF);
 		double testsPerSec = (double)resultCount/(duration/1000.0);

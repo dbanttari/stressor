@@ -2,6 +2,7 @@ package net.darylb.stressor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -16,23 +17,43 @@ import org.apache.http.util.EntityUtils;
 public class HttpPostAction extends AbstractHttpAction {
 
 	private static final int MAX_REDIRECTS = 10;
-	private final URI uri;
+	private URI uri;
 	private HttpEntity httpEntity;
 	private HttpClient httpClient;
+	protected boolean followRedirects = true;
+	HttpResponse response;
 
-	public HttpPostAction(HttpClient httpClient, URI uri, HttpEntity httpEntity) {
+	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri) {
+		super(cx);
+		if(httpClient==null) {
+			throw new IllegalArgumentException("httpClient cannot be null");
+		}
 		this.httpClient = httpClient;
-		this.uri = uri;
+		try {
+			this.uri = new URI(uri);
+		}
+		catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri, HttpEntity httpEntity) {
+		this(cx, httpClient, uri);
 		this.httpEntity = httpEntity;
 	}
 	
-	public HttpPostAction(HttpClient httpClient, String uri, String urlEncodedFormParams) {
-		this(httpClient,
-				URI.create(uri),
+	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri, String urlEncodedFormParams) {
+		this(cx,
+				httpClient,
+				uri,
 				new StringEntity(urlEncodedFormParams, ContentType.create("application/x-www-form-urlencoded"))
 		);
 	}
 
+	protected void setHttpEntity(HttpEntity entity) {
+		this.httpEntity = entity;
+	}
+	
 	@Override
 	public ActionResult call() {
 		ActionResult actionResult = new ActionResult(this.getClass().getName());
@@ -55,14 +76,17 @@ public class HttpPostAction extends AbstractHttpAction {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPost httpPost = new HttpPost(uri);
 		httpPost.setEntity(httpEntity);
-		HttpResponse response = httpClient.execute(httpPost);
+		addRequestHeaders(httpPost);
+		response = httpClient.execute(httpPost);
 		int hitCount = 1;
-		while(hitCount++ < MAX_REDIRECTS && (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302)) {
+		while(followRedirects && hitCount++ < MAX_REDIRECTS && (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302)) {
 			EntityUtils.consume(response.getEntity());
+			super.parseCookies(response);
 			// redirects are always GETs.  Switch method
 			HttpGet httpGet = new HttpGet(uri.resolve(response.getFirstHeader("Location").getValue()));
 			response = httpClient.execute(httpGet);
 		}
+		super.parseCookies(response);
 		ret.setStatus(response.getStatusLine().getStatusCode());
 		if(response.getStatusLine().getStatusCode() != 200) {
 			String reason = "Response code " + response.getStatusLine().getStatusCode();
@@ -73,12 +97,17 @@ public class HttpPostAction extends AbstractHttpAction {
 		if (entity != null) {
 			String content = EntityUtils.toString(entity);
 	        ret.setContent(content);
-	        ret.setValid(validate(content));
+	        try {
+				ret.setValid(validate(content));
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				ret.setValid(e.toString());
+			}
 		}
 		return ret;
 	}
 
-	
 	protected void log(String s) {
 		//System.out.println("HttpPostAction " + Thread.currentThread().getName() + ": " + s);
 	}
@@ -86,5 +115,17 @@ public class HttpPostAction extends AbstractHttpAction {
 	public URI getUri() {
 		return uri;
 	}
+	
+	public void setUri(String uri) throws URISyntaxException {
+		this.uri = new URI(uri);
+	}
 
+	public void setUri(URI uri) {
+		this.uri = uri;
+	}
+	
+	protected HttpResponse getResponse() {
+		return response;
+	}
+	
 }
