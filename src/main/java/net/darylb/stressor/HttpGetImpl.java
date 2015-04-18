@@ -1,6 +1,5 @@
 package net.darylb.stressor;
 
-import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +9,8 @@ public class HttpGetImpl extends HttpGetAction {
 	private String expected;
 	private String url;
 	
-	public HttpGetImpl(TestContext cx, HttpClient httpClient, String url, String expected) {
-		super(cx, httpClient, url);
+	public HttpGetImpl(TestContext cx, String url, String expected) {
+		super(cx, url);
 		this.url = url;
 		this.expected = expected;
 	}

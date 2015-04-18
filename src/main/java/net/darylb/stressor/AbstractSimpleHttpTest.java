@@ -3,13 +3,12 @@ package net.darylb.stressor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
 
 public abstract class AbstractSimpleHttpTest extends HttpGetAction {
 	
-	protected AbstractSimpleHttpTest(TestContext cx, HttpClient httpClient, String path) {
-		super(cx, httpClient, path);
+	protected AbstractSimpleHttpTest(TestContext cx, String path) {
+		super(cx, path);
 	}
 
 	private int uriPos = 0;

@@ -7,16 +7,18 @@ public class ActionResult {
 	private Throwable exception;
 	private boolean passed;
 	private String reason;
-	private long durationMs = -1;
 	private int requestCount;
 	private long requestDuration;
 	private String name;
+	private long startTick;
 
 	public ActionResult(String name) {
 		this.name = name;
+		this.startTick = System.currentTimeMillis();
 	}
 	
 	public void setStatus(int statusCode) {
+		setDuration();
 		this.statusCode = statusCode;
 	}
 
@@ -29,6 +31,7 @@ public class ActionResult {
 	}
 
 	public void setContent(String content) {
+		setDuration();
 		this.content = content;
 	}
 
@@ -37,6 +40,7 @@ public class ActionResult {
 	}
 
 	public void setException(Throwable exception) {
+		setDuration();
 		this.exception = exception;
 	}
 
@@ -45,6 +49,7 @@ public class ActionResult {
 	}
 
 	public void setFail(String reason) {
+		setDuration();
 		this.setReason(reason);
 		this.passed = false;
 	}
@@ -54,10 +59,12 @@ public class ActionResult {
 	}
 
 	public void setReason(String reason) {
+		setDuration();
 		this.reason = reason;
 	}
 
 	public void setValid(String reason) {
+		setDuration();
 		if(reason == null) {
 			passed = true;
 		}
@@ -65,23 +72,14 @@ public class ActionResult {
 			System.out.println("Test failed: " + reason);
 			setFail(reason);
 		}
-		
 	}
 
-	public void setDurationMs(long durationMs) {
-		if(this.durationMs==-1) {
-			this.durationMs = durationMs;
-		}
-	}
-	
-	public long getDurationMs() {
-		if(this.durationMs==-1) {
-			throw new IllegalStateException("Action duration not set by action!");
-		}
-		return this.durationMs;
+	private void setDuration() {
+		this.requestDuration = System.currentTimeMillis() - startTick;
 	}
 
 	public void setRequestCount(int hitCount) {
+		setDuration();
 		this.requestCount = hitCount;
 	}
 	
@@ -91,10 +89,6 @@ public class ActionResult {
 
 	public long getRequestDuration() {
 		return requestDuration;
-	}
-
-	public void setRequestDuration(long requestDuration) {
-		this.requestDuration = requestDuration;
 	}
 
 	public String getName() {

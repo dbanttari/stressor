@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
@@ -17,15 +16,9 @@ public class HttpPutAction extends AbstractHttpAction {
 
 	private final URI uri;
 	private HttpEntity httpEntity;
-	private HttpClient httpClient;
 	HttpResponse response;
 
-	public HttpPutAction(TestContext cx, HttpClient httpClient, String path) {
-		super(cx);
-		if(httpClient==null) {
-			throw new IllegalArgumentException("httpClient cannot be null");
-		}
-		this.httpClient = httpClient;
+	public HttpPutAction(String path) {
 		try {
 			this.uri = new URI(path);
 		}
@@ -34,13 +27,13 @@ public class HttpPutAction extends AbstractHttpAction {
 		}
 	}
 	
-	public HttpPutAction(TestContext cx, HttpClient httpClient, String path, HttpEntity httpEntity) {
-		this(cx, httpClient, path);
+	public HttpPutAction(String path, HttpEntity httpEntity) {
+		this(path);
 		this.httpEntity = httpEntity;
 	}
 	
-	public HttpPutAction(TestContext cx, HttpClient httpClient, String uri, File file) {
-		this(cx, httpClient, uri, new FileEntity(file));
+	public HttpPutAction(String uri, File file) {
+		this(uri, new FileEntity(file));
 		addHeader("Content-Type", "application/octet-stream");
 	}
 
@@ -49,11 +42,11 @@ public class HttpPutAction extends AbstractHttpAction {
 	}
 	
 	@Override
-	public ActionResult call() {
+	public ActionResult call(TestContext cx) {
 		ActionResult actionResult = new ActionResult(this.getClass().getName());
 		try {
 			log("Fetching " + getUri().toString());
-			actionResult = doHttpRequest(getUri());
+			actionResult = doHttpRequest(cx, getUri());
 			//log("Completed " + uri.toString());
 		}
 		catch (Throwable t) {
@@ -66,12 +59,12 @@ public class HttpPutAction extends AbstractHttpAction {
 		return actionResult;
 	}
 
-	protected ActionResult doHttpRequest(URI uri) throws ClientProtocolException, IOException {
+	protected ActionResult doHttpRequest(TestContext cx, URI uri) throws ClientProtocolException, IOException {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPut httpPut = new HttpPut(uri);
 		httpPut.setEntity(httpEntity);
 		addRequestHeaders(httpPut);
-		response = httpClient.execute(httpPut);
+		response = getHttpClient(cx).execute(httpPut);
 		super.parseCookies(response);
 		int status = response.getStatusLine().getStatusCode();
 		ret.setStatus(status);
@@ -84,13 +77,6 @@ public class HttpPutAction extends AbstractHttpAction {
 		if (entity != null) {
 			String content = EntityUtils.toString(entity);
 	        ret.setContent(content);
-	        try {
-				ret.setValid(validate(content));
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				ret.setValid(e.toString());
-			}
 		}
 		return ret;
 	}

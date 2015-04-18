@@ -18,23 +18,23 @@ public class HttpGetAction extends AbstractHttpAction {
 	
 	private static final int MAX_REDIRECTS = 10;
 	private final URI uri;
-	private HttpClient httpClient;
 	private String referer;
 	private HttpResponse response;
 
-	public HttpGetAction(TestContext cx, HttpClient httpClient, String path) {
-		super(cx);
-		this.httpClient = httpClient;
+	private TestContext cx;
+
+	public HttpGetAction(TestContext cx, String path) {
+		this.cx = cx;
 		this.uri = URI.create(path);
 	}
 	
-	public HttpGetAction(TestContext cx, HttpClient httpClient, String path, String referer) {
-		this(cx, httpClient, path);
+	public HttpGetAction(TestContext cx, String path, String referer) {
+		this(cx, path);
 		this.referer = referer;
 	}
 	
 	@Override
-	public ActionResult call() {
+	public ActionResult call(TestContext cx) {
 		ActionResult actionResult = new ActionResult(this.getClass().getName());
 		try {
 			log.trace("Fetching " + uri.toString());
@@ -58,6 +58,7 @@ public class HttpGetAction extends AbstractHttpAction {
 		}
 		long totalRequestDuration = 0;
 		long reqStart = System.currentTimeMillis();
+		HttpClient httpClient = super.getHttpClient(cx);
 		response = httpClient.execute(httpget);
 		totalRequestDuration += System.currentTimeMillis() - reqStart;
 		int requestCount = 1;
@@ -66,8 +67,6 @@ public class HttpGetAction extends AbstractHttpAction {
 			super.parseCookies(response);
 			uri = uri.resolve(response.getFirstHeader("Location").getValue());
 			HttpGet httpGet = new HttpGet(uri);
-			referer = uri.toString();
-			httpGet.addHeader("referer", referer);
 			reqStart = System.currentTimeMillis();
 			response = httpClient.execute(httpGet);
 			totalRequestDuration += System.currentTimeMillis() - reqStart;
@@ -86,7 +85,7 @@ public class HttpGetAction extends AbstractHttpAction {
 			String content = EntityUtils.toString(entity);
 		    ret.setContent(content);
 		    try {
-				ret.setValid(validate(content));
+				ret.setValid(validate(cx, content));
 			}
 			catch (Exception e) {
 				e.printStackTrace();

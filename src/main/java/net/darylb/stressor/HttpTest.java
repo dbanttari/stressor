@@ -4,19 +4,14 @@ import org.apache.http.client.HttpClient;
 
 public abstract class HttpTest extends Test {
 
-	private HttpClient httpClient;
-	
-	protected HttpClient getHttpClient() {
-		if(this.httpClient == null) {
-			httpClient = new ReferringHttpClient();
-		}
-		return httpClient;
+	protected HttpTest(TestContext cx) {
+		super(cx);
 	}
 
 	@Override
-	protected void onTestComplete() {
-		super.onTestComplete();
-		httpClient.getConnectionManager().shutdown();
+	protected void onTestComplete(TestContext cx) {
+		super.onTestComplete(cx);
+		((HttpClient)cx.getTestObject("http.client")).getConnectionManager().shutdown();
 	}
 
 	

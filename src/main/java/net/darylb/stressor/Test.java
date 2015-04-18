@@ -4,6 +4,12 @@ import java.util.concurrent.Callable;
 
 public abstract class Test implements Callable<TestResult> {
 
+	private TestContext cx;
+
+	protected Test(TestContext cx) {
+		this.cx = cx;
+	}
+	
 	private TestResult testResult;
 
 	public TestResult getTestResult() {
@@ -14,33 +20,42 @@ public abstract class Test implements Callable<TestResult> {
 		this.testResult = testResult;
 	}
 
-	public abstract Action getNextAction(Action previousAction);
+	public abstract Action getNextAction(TestContext cx, Action previousAction);
 
 	@Override
 	public TestResult call() {
+		cx.newTest();
 		TestResult testResult = new TestResult(getTestName());
 		Action previousAction = null, action;
 		boolean lastActionPassed = true;
-		while(lastActionPassed && (action = getNextAction(previousAction)) != null) {
+		while(lastActionPassed && (action = getNextAction(cx, previousAction)) != null) {
 			long startTick = System.currentTimeMillis();
-			ActionResult actionResult = action.call();
+			ActionResult actionResult = action.call(cx);
+			try {
+				action.validate(cx, actionResult.getContent());
+			}
+			catch (Exception e) {
+				actionResult.setFail(e.toString());
+				actionResult.setException(e);
+			}
 			actionResult.setDurationMs(System.currentTimeMillis() - startTick);
 			testResult.addActionResult(actionResult);
 			lastActionPassed = actionResult.isPassed();
 			previousAction = action;
 		}
-		onTestComplete();
+		onTestComplete(cx);
 		// free up content memory
 		for(ActionResult actionResult : testResult.getActionResults()) {
 			actionResult.setContent(null);
 		}
+		
 		return testResult;
 	}
 	
 	/**
 	 * If you want to use any actionResult.content do so here.  (eg to save error pages)
 	 */
-	protected void onTestComplete() {
+	protected void onTestComplete(TestContext cx) {
 		// exists to be overridden
 	}
 

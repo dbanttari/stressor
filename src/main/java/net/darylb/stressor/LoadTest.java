@@ -32,7 +32,7 @@ public class LoadTest {
 		List<Test> tests = new LinkedList<Test>(); 
 		List<Future<TestResult>> testResults = new LinkedList<Future<TestResult>>();
 		for(int i=0; i<numIterationsPerThread * numThreads; i++) {
-			Test test = testFactory.getTest();
+			Test test = testFactory.getTest(cx);
 			if(test != null) {
 				tests.add(test);
 			}

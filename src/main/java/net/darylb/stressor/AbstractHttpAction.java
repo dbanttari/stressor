@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
 public abstract class AbstractHttpAction extends Action {
@@ -54,9 +55,6 @@ public abstract class AbstractHttpAction extends Action {
 		}
 	}
 	
-	public AbstractHttpAction(TestContext cx) {
-		super(cx);
-	}
 	byte[] readContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
 		return readContentFromEntity(entity, 16384);
 	}
@@ -73,6 +71,18 @@ public abstract class AbstractHttpAction extends Action {
 	        instream.close();
 	    }
 	    return Arrays.copyOfRange(buf, 0, pos);
+	}
+	
+	HttpClient getHttpClient(TestContext cx) {
+		HttpClient ret;
+		if(cx.hasTestObject("http.client")) {
+			ret = (HttpClient)cx.getTestObject("http.client");
+		}
+		else {
+			ret = new ReferringHttpClient();
+			cx.setTestObject("http.client", ret);
+		}
+		return ret;
 	}
 
 }

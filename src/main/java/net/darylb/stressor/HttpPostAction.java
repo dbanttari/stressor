@@ -19,16 +19,10 @@ public class HttpPostAction extends AbstractHttpAction {
 	private static final int MAX_REDIRECTS = 10;
 	private URI uri;
 	private HttpEntity httpEntity;
-	private HttpClient httpClient;
 	protected boolean followRedirects = true;
 	HttpResponse response;
 
-	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri) {
-		super(cx);
-		if(httpClient==null) {
-			throw new IllegalArgumentException("httpClient cannot be null");
-		}
-		this.httpClient = httpClient;
+	public HttpPostAction(String uri) {
 		try {
 			this.uri = new URI(uri);
 		}
@@ -37,17 +31,13 @@ public class HttpPostAction extends AbstractHttpAction {
 		}
 	}
 	
-	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri, HttpEntity httpEntity) {
-		this(cx, httpClient, uri);
+	public HttpPostAction(TestContext cx, String uri, HttpEntity httpEntity) {
+		this(uri);
 		this.httpEntity = httpEntity;
 	}
 	
-	public HttpPostAction(TestContext cx, HttpClient httpClient, String uri, String urlEncodedFormParams) {
-		this(cx,
-				httpClient,
-				uri,
-				new StringEntity(urlEncodedFormParams, ContentType.create("application/x-www-form-urlencoded"))
-		);
+	public HttpPostAction(TestContext cx, String uri, String urlEncodedFormParams) {
+		this(cx, uri, new StringEntity(urlEncodedFormParams, ContentType.create("application/x-www-form-urlencoded")));
 	}
 
 	protected void setHttpEntity(HttpEntity entity) {
@@ -55,11 +45,11 @@ public class HttpPostAction extends AbstractHttpAction {
 	}
 	
 	@Override
-	public ActionResult call() {
+	public ActionResult call(TestContext cx) {
 		ActionResult actionResult = new ActionResult(this.getClass().getName());
 		try {
 			log("Fetching " + getUri().toString());
-			actionResult = doHttpRequest(getUri());
+			actionResult = doHttpRequest(cx, getUri());
 			//log("Completed " + uri.toString());
 		}
 		catch (Throwable t) {
@@ -72,21 +62,29 @@ public class HttpPostAction extends AbstractHttpAction {
 		return actionResult;
 	}
 
-	protected ActionResult doHttpRequest(URI uri) throws ClientProtocolException, IOException {
+	protected ActionResult doHttpRequest(TestContext cx, URI uri) throws ClientProtocolException, IOException {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPost httpPost = new HttpPost(uri);
 		httpPost.setEntity(httpEntity);
 		addRequestHeaders(httpPost);
+		long totalRequestDuration = 0;
+		long reqStart = System.currentTimeMillis();
+		HttpClient httpClient = getHttpClient(cx);
 		response = httpClient.execute(httpPost);
+		totalRequestDuration += System.currentTimeMillis() - reqStart;
 		int hitCount = 1;
 		while(followRedirects && hitCount++ < MAX_REDIRECTS && (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302)) {
 			EntityUtils.consume(response.getEntity());
 			super.parseCookies(response);
 			// redirects are always GETs.  Switch method
-			HttpGet httpGet = new HttpGet(uri.resolve(response.getFirstHeader("Location").getValue()));
+			HttpGet httpGet = new HttpGet(uri.resolve(response.getLastHeader("Location").getValue()));
+			reqStart = System.currentTimeMillis();
 			response = httpClient.execute(httpGet);
+			totalRequestDuration += System.currentTimeMillis() - reqStart;
 		}
 		super.parseCookies(response);
+		ret.setRequestCount(hitCount);
+		ret.setRequestDuration(totalRequestDuration);
 		ret.setStatus(response.getStatusLine().getStatusCode());
 		if(response.getStatusLine().getStatusCode() != 200) {
 			String reason = "Response code " + response.getStatusLine().getStatusCode();
@@ -97,13 +95,6 @@ public class HttpPostAction extends AbstractHttpAction {
 		if (entity != null) {
 			String content = EntityUtils.toString(entity);
 	        ret.setContent(content);
-	        try {
-				ret.setValid(validate(content));
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				ret.setValid(e.toString());
-			}
 		}
 		return ret;
 	}
