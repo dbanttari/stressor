@@ -13,7 +13,7 @@ public class AverageByLabel {
 			avg = new Average();
 			results.put(result.getName(), avg);
 		}
-		avg.add(result.getDurationMs());
+		avg.add(result.getAverageRequestDurationMs());
 	}
 
 	public Map<String, Average> getResults() {

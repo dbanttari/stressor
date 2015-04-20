@@ -53,7 +53,7 @@ public class TestResults {
 				}
 				actionCount++;
 				requestCount += actionResult.getRequestCount();
-				totalRequestDuration += actionResult.getRequestDuration();
+				totalRequestDuration += actionResult.getRequestDurationMs();
 				durationByAction.add(actionResult);
 				if(statusCode >= 500) {
 					String fn = "errorPage" + actionCount + "." + statusCode + ".html";
@@ -70,7 +70,7 @@ public class TestResults {
 					}
 				}
 				//System.out.println(actionResult.getDurationMs());
-				totalActionDuration += actionResult.getDurationMs();
+				totalActionDuration += actionResult.getRequestDurationMs();
 			}
 			if(testResult.isPassed()) {
 				passedCount++;

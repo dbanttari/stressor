@@ -4,12 +4,22 @@ import java.util.Calendar;
 
 public abstract class TestRunner {
 	
-	public TestResults test(TestContext cx, TestFactory factory, int threads, int testsPerThread) throws Throwable {
+	public TestResults doFixedTest(int threads, int testsPerThread) {
+		TestContext cx = getTestContext();
+		TestFactory fac = getTestFactory(cx);
 		cx.getLogDir().mkdirs();
-		LoadTest loadTest = new LoadTest(cx, factory, threads, testsPerThread);
+		FixedLoadTest loadTest = new FixedLoadTest(cx, fac, threads, testsPerThread);
 		return loadTest.doTests();
 	}
-
+	
+	public TestResults doTimedTest(int threads, long endTick) {
+		TestContext cx = getTestContext();
+		TestFactory fac = getTestFactory(cx);
+		cx.getLogDir().mkdirs();
+		TimedLoadTest loadTest = new TimedLoadTest(cx, fac, threads, endTick);
+		return loadTest.doTests();
+	}
+	
 	public static String getTimestamp() {
 		Calendar c = Calendar.getInstance();
 		StringBuffer timestamp = new StringBuffer();
@@ -28,5 +38,9 @@ public abstract class TestRunner {
 		}
 		return Integer.toString(n);
 	}
+	
+	public abstract TestFactory getTestFactory(TestContext cx);
+	
+	public abstract TestContext getTestContext();
 	
 }

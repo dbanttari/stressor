@@ -67,24 +67,18 @@ public class HttpPostAction extends AbstractHttpAction {
 		HttpPost httpPost = new HttpPost(uri);
 		httpPost.setEntity(httpEntity);
 		addRequestHeaders(httpPost);
-		long totalRequestDuration = 0;
-		long reqStart = System.currentTimeMillis();
 		HttpClient httpClient = getHttpClient(cx);
 		response = httpClient.execute(httpPost);
-		totalRequestDuration += System.currentTimeMillis() - reqStart;
 		int hitCount = 1;
 		while(followRedirects && hitCount++ < MAX_REDIRECTS && (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302)) {
 			EntityUtils.consume(response.getEntity());
 			super.parseCookies(response);
 			// redirects are always GETs.  Switch method
 			HttpGet httpGet = new HttpGet(uri.resolve(response.getLastHeader("Location").getValue()));
-			reqStart = System.currentTimeMillis();
 			response = httpClient.execute(httpGet);
-			totalRequestDuration += System.currentTimeMillis() - reqStart;
 		}
 		super.parseCookies(response);
 		ret.setRequestCount(hitCount);
-		ret.setRequestDuration(totalRequestDuration);
 		ret.setStatus(response.getStatusLine().getStatusCode());
 		if(response.getStatusLine().getStatusCode() != 200) {
 			String reason = "Response code " + response.getStatusLine().getStatusCode();

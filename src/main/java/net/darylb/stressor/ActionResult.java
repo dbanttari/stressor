@@ -5,10 +5,10 @@ public class ActionResult {
 	private int statusCode;
 	private String content;
 	private Throwable exception;
-	private boolean passed;
+	private boolean passed = true;
 	private String reason;
 	private int requestCount;
-	private long requestDuration;
+	private long requestDurationMs;
 	private String name;
 	private long startTick;
 
@@ -75,7 +75,7 @@ public class ActionResult {
 	}
 
 	private void setDuration() {
-		this.requestDuration = System.currentTimeMillis() - startTick;
+		this.requestDurationMs = System.currentTimeMillis() - startTick;
 	}
 
 	public void setRequestCount(int hitCount) {
@@ -87,8 +87,12 @@ public class ActionResult {
 		return this.requestCount;
 	}
 
-	public long getRequestDuration() {
-		return requestDuration;
+	public long getRequestDurationMs() {
+		return requestDurationMs;
+	}
+	
+	public long getAverageRequestDurationMs() {
+		return requestCount==0 ? 0 : requestDurationMs / (long)requestCount;
 	}
 
 	public String getName() {

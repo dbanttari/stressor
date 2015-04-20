@@ -2,8 +2,13 @@ package net.darylb.stressor;
 
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class Test implements Callable<TestResult> {
 
+	private static Logger log = LoggerFactory.getLogger(Test.class);
+	
 	private TestContext cx;
 
 	protected Test(TestContext cx) {
@@ -29,19 +34,30 @@ public abstract class Test implements Callable<TestResult> {
 		Action previousAction = null, action;
 		boolean lastActionPassed = true;
 		while(lastActionPassed && (action = getNextAction(cx, previousAction)) != null) {
-			long startTick = System.currentTimeMillis();
-			ActionResult actionResult = action.call(cx);
 			try {
-				action.validate(cx, actionResult.getContent());
+				ActionResult actionResult = action.call(cx);
+				try {
+					action.validate(cx, actionResult.getContent());
+				}
+				catch (Exception e) {
+					log.error("Validation failed", e);
+					actionResult.setFail(e.toString());
+					actionResult.setException(e);
+				}
+				testResult.addActionResult(actionResult);
+				lastActionPassed = actionResult.isPassed();
+				previousAction = action;
 			}
 			catch (Exception e) {
+				log.error("Test failed", e);
+				e.printStackTrace();
+				ActionResult actionResult = new ActionResult(action.getClass().getSimpleName());
 				actionResult.setFail(e.toString());
 				actionResult.setException(e);
+				testResult.addActionResult(actionResult);
+				lastActionPassed = false;
+				previousAction = action;
 			}
-			actionResult.setDurationMs(System.currentTimeMillis() - startTick);
-			testResult.addActionResult(actionResult);
-			lastActionPassed = actionResult.isPassed();
-			previousAction = action;
 		}
 		onTestComplete(cx);
 		// free up content memory

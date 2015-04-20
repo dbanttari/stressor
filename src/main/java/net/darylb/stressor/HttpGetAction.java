@@ -56,24 +56,18 @@ public class HttpGetAction extends AbstractHttpAction {
 		if(referer!=null) {
 			httpget.setHeader("Referer", referer);
 		}
-		long totalRequestDuration = 0;
-		long reqStart = System.currentTimeMillis();
 		HttpClient httpClient = super.getHttpClient(cx);
 		response = httpClient.execute(httpget);
-		totalRequestDuration += System.currentTimeMillis() - reqStart;
 		int requestCount = 1;
 		while( (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302) && requestCount++ < MAX_REDIRECTS ) {
 			EntityUtils.consume(response.getEntity());
 			super.parseCookies(response);
 			uri = uri.resolve(response.getFirstHeader("Location").getValue());
 			HttpGet httpGet = new HttpGet(uri);
-			reqStart = System.currentTimeMillis();
 			response = httpClient.execute(httpGet);
-			totalRequestDuration += System.currentTimeMillis() - reqStart;
 		}
 		super.parseCookies(response);
 		ret.setRequestCount(requestCount);
-		ret.setRequestDuration(totalRequestDuration);
 		ret.setStatus(response.getStatusLine().getStatusCode());
 		if(response.getStatusLine().getStatusCode() != 200) {
 			String reason = "Response code " + response.getStatusLine().getStatusCode();
@@ -84,13 +78,6 @@ public class HttpGetAction extends AbstractHttpAction {
 		if (entity != null) {
 			String content = EntityUtils.toString(entity);
 		    ret.setContent(content);
-		    try {
-				ret.setValid(validate(cx, content));
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				ret.setValid(e.toString());
-			}
 		}
 		return ret;
 	}

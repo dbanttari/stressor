@@ -45,6 +45,9 @@ public class TestResult {
 	}
 
 	public void setPassed(boolean isPass) {
+		if(!isPass) {
+			new Exception().printStackTrace();
+		}
 		isPassed = isPass;
 	}
 

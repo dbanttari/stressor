@@ -9,8 +9,19 @@ public abstract class Action {
 	 * @param content
 	 * @return
 	 */
-	protected String validate(TestContext cx, String content) throws Exception {
-		return null;
+	protected void validate(TestContext cx, String content) throws Exception {
+	}
+	
+	protected void invalid(String reason) throws TestValidationException {
+		throw new TestValidationException(reason);
+	}
+
+	protected void invalid(String reason, Throwable t) throws TestValidationException {
+		throw new TestValidationException(reason, t);
+	}
+
+	protected void invalid(Throwable t) throws TestValidationException {
+		throw new TestValidationException(t);
 	}
 	
 }

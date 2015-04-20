@@ -1,19 +1,21 @@
 package net.darylb.stressor;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpPutAction extends AbstractHttpAction {
 
+	private static Logger log = LoggerFactory.getLogger(HttpPutAction.class);
+	
 	private final URI uri;
 	private HttpEntity httpEntity;
 	HttpResponse response;
@@ -43,46 +45,39 @@ public class HttpPutAction extends AbstractHttpAction {
 	
 	@Override
 	public ActionResult call(TestContext cx) {
-		ActionResult actionResult = new ActionResult(this.getClass().getName());
-		try {
-			log("Fetching " + getUri().toString());
-			actionResult = doHttpRequest(cx, getUri());
-			//log("Completed " + uri.toString());
-		}
-		catch (Throwable t) {
-			log("Request Failed:");
-			t.printStackTrace();
-			actionResult = new ActionResult(this.getClass().getName());
-			actionResult.setFail(t.getMessage());
-			actionResult.setException(t);
-		}
+		log.debug("Storing " + getUri().toString());
+		ActionResult actionResult = doHttpRequest(cx, getUri());
+		log.debug("Completed " + uri.toString());
 		return actionResult;
 	}
 
-	protected ActionResult doHttpRequest(TestContext cx, URI uri) throws ClientProtocolException, IOException {
+	protected ActionResult doHttpRequest(TestContext cx, URI uri) {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPut httpPut = new HttpPut(uri);
 		httpPut.setEntity(httpEntity);
 		addRequestHeaders(httpPut);
-		response = getHttpClient(cx).execute(httpPut);
-		super.parseCookies(response);
-		int status = response.getStatusLine().getStatusCode();
-		ret.setStatus(status);
-		if(status != 200 && status != 201) {
-			String reason = "Response code " + status;
-			log("Test failure: " + reason);
-			ret.setFail(reason);
+		try {
+			response = getHttpClient(cx).execute(httpPut);
+			super.parseCookies(response);
+			int status = response.getStatusLine().getStatusCode();
+			ret.setStatus(status);
+			if(status != 200 && status != 201) {
+				String reason = "Response code " + status;
+				log.warn("Test failure: " + reason);
+				ret.setFail(reason);
+			}
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				String content = EntityUtils.toString(entity);
+		        ret.setContent(content);
+			}
 		}
-		HttpEntity entity = response.getEntity();
-		if (entity != null) {
-			String content = EntityUtils.toString(entity);
-	        ret.setContent(content);
+		catch (Throwable t) {
+			log.warn("Request Failed:", t);
+			ret.setFail(t.getMessage());
+			ret.setException(t);
 		}
 		return ret;
-	}
-
-	protected void log(String s) {
-		//System.out.println("HttpPutAction " + Thread.currentThread().getName() + ": " + s);
 	}
 
 	public URI getUri() {
