@@ -5,10 +5,10 @@ import java.net.URISyntaxException;
 
 import org.apache.http.client.utils.URIBuilder;
 
-public abstract class AbstractSimpleHttpTest extends HttpGetAction {
+public abstract class AbstractSimpleHttpTest extends HttpGetActionImpl {
 	
-	protected AbstractSimpleHttpTest(TestContext cx, String path) {
-		super(cx, path);
+	protected AbstractSimpleHttpTest(String path) {
+		super(path);
 	}
 
 	private int uriPos = 0;

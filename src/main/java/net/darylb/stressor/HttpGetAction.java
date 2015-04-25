@@ -2,6 +2,7 @@ package net.darylb.stressor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -12,46 +13,39 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpGetAction extends AbstractHttpAction {
+public abstract class HttpGetAction extends AbstractHttpAction {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpGetAction.class);
 	
 	private static final int MAX_REDIRECTS = 10;
-	private final URI uri;
 	private String referer;
 	private HttpResponse response;
-
-	private TestContext cx;
-
-	public HttpGetAction(TestContext cx, String path) {
-		this.cx = cx;
-		this.uri = URI.create(path);
-	}
-	
-	public HttpGetAction(TestContext cx, String path, String referer) {
-		this(cx, path);
-		this.referer = referer;
-	}
 	
 	@Override
 	public ActionResult call(TestContext cx) {
-		ActionResult actionResult = new ActionResult(this.getClass().getName());
+		ActionResult actionResult = new ActionResult(this.getName());
 		try {
-			log.trace("Fetching " + uri.toString());
-			actionResult = doHttpRequest(uri);
-			//log("Completed " + uri.toString());
+			actionResult = doHttpRequest(cx);
 		}
 		catch (Throwable t) {
 			log.error("Request to {} Failed", this.toString(), t);
-			actionResult = new ActionResult(this.getClass().getName());
+			actionResult = new ActionResult(this.getName());
 			actionResult.setFail(t.getMessage());
 			actionResult.setException(t);
 		}
 		return actionResult;
 	}
 	
-	protected ActionResult doHttpRequest(URI uri) throws ClientProtocolException, IOException {
-		ActionResult ret = new ActionResult(this.getClass().getName());
+	protected ActionResult doHttpRequest(TestContext cx) throws ClientProtocolException, IOException {
+		ActionResult ret = new ActionResult(this.getName());
+		String uriString = getUri(cx);
+		URI uri;
+		try {
+			uri = new URI(uriString);
+		}
+		catch (URISyntaxException e) {
+			throw new RuntimeException("Invalid uri: " + uriString, e);
+		}
 		HttpGet httpget = new HttpGet(uri);
 		if(referer!=null) {
 			httpget.setHeader("Referer", referer);
@@ -82,9 +76,7 @@ public class HttpGetAction extends AbstractHttpAction {
 		return ret;
 	}
 
-	public URI getUri() {
-		return uri;
-	}
+	public abstract String getUri(TestContext cx);
 	
 	protected HttpResponse getResponse() {
 		return response;

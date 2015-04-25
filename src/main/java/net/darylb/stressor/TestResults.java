@@ -1,8 +1,5 @@
 package net.darylb.stressor;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,17 +54,8 @@ public class TestResults {
 				durationByAction.add(actionResult);
 				if(statusCode >= 500) {
 					String fn = "errorPage" + actionCount + "." + statusCode + ".html";
-					try {
-						OutputStream out = new FileOutputStream(cx.getLogDir() + fn);
-						String foo = actionResult.getContent();
-						if(foo != null) {
-							out.write(foo.getBytes());
-						}
-						out.close();
-						errorPages.add(fn);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					Util.writeFile(cx.getLogDir(), fn, actionResult.getContent());
+					errorPages.add(fn);
 				}
 				//System.out.println(actionResult.getDurationMs());
 				totalActionDuration += actionResult.getRequestDurationMs();
@@ -135,6 +123,10 @@ public class TestResults {
 	public void testEnded() {
 		log.info("Test Complete.");
 		endTick = System.currentTimeMillis();
+	}
+
+	public long size() {
+		return requestCount;
 	}
 	
 }

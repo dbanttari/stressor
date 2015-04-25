@@ -26,7 +26,7 @@ public class ReferringHttpClient implements HttpClient {
 	public ReferringHttpClient() {
 		ClientConnectionManager connManager = new BasicClientConnectionManager();
 		HttpParams params = new BasicHttpParams();
-		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 30000);
+		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		HttpClient defaultHttpClient = new DefaultHttpClient(connManager, params);
 		TrustingX509TrustManager tm = new TrustingX509TrustManager();

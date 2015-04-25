@@ -9,7 +9,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author daryl.banttari
  *
- * content of test file: (in case wwwroot/sandbox gets deleted again)
+ * content of test file (ColdFusion/Railo):
  * 
  * Referrer is <cfoutput>#cgi.http_referer#</cfoutput>
  * <br><br>
@@ -28,11 +28,7 @@ public class ReferringHttpClientTest {
 
 	private static final Logger log = LoggerFactory.getLogger(ReferringHttpClientTest.class);
 	
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@Test
+	@Test @Ignore
 	public void test() throws Exception {
 		String url = "http://localhost/referertest.cfm";
 		
@@ -51,5 +47,5 @@ public class ReferringHttpClientTest {
 		assertTrue(content.contains(url));
 		
 	}
-
+	
 }

@@ -11,20 +11,24 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHttpAction extends Action {
 
+	private static Logger log = LoggerFactory.getLogger(AbstractHttpAction.class);
+	
 	LinkedHashMap<String, Cookie> cookies;
 	
 	protected void parseCookies(HttpResponse response) {
 		if(cookies==null) {
 			cookies = new LinkedHashMap<String, Cookie>();
-			for(Header header : response.getAllHeaders()) {
-				if(header.getName().equalsIgnoreCase("Set-Cookie")) {
-					Cookie c = new Cookie(header.getValue());
-					System.out.println("Cookie " + c.name + ":" + c.value);
-					cookies.put(c.name.toLowerCase(), c);
-				}
+		}
+		for(Header header : response.getAllHeaders()) {
+			if(header.getName().equalsIgnoreCase("Set-Cookie")) {
+				Cookie c = new Cookie(header.getValue());
+				log.debug("cookie " + c.name.toLowerCase() + ": " + c.value);
+				cookies.put(c.name.toLowerCase(), c);
 			}
 		}
 	}
@@ -39,7 +43,6 @@ public abstract class AbstractHttpAction extends Action {
 	
 	public String getNewCookieValue(String cookieName, String dfault) {
 		Cookie c = cookies.get(cookieName.toLowerCase());
-		System.out.println("c=" + (c==null ? "null" : c.toString()));
 		return c == null ? dfault : c.value;
 	}
 	

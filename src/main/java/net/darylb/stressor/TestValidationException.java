@@ -1,6 +1,6 @@
 package net.darylb.stressor;
 
-public class TestValidationException extends Exception {
+public class TestValidationException extends RuntimeException {
 
 	/**
 	 * 

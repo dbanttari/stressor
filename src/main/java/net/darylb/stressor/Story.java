@@ -1,22 +1,24 @@
 package net.darylb.stressor;
 
-import java.util.concurrent.Callable;
+import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Test implements Callable<TestResult> {
+public abstract class Story {
 
-	private static Logger log = LoggerFactory.getLogger(Test.class);
-	
-	private TestContext cx;
-
-	protected Test(TestContext cx) {
-		this.cx = cx;
-	}
+	private static Logger log = LoggerFactory.getLogger(Story.class);
 	
 	private TestResult testResult;
 
+	private String name;
+	
+	private volatile static int errNumber = 0;
+
+	public Story() {
+		this.name = this.getClass().getSimpleName();
+	}
+	
 	public TestResult getTestResult() {
 		return testResult;
 	}
@@ -25,12 +27,27 @@ public abstract class Test implements Callable<TestResult> {
 		this.testResult = testResult;
 	}
 
-	public abstract Action getNextAction(TestContext cx, Action previousAction);
+	LinkedList<Action> actions;
+	protected void addAction(Action action) {
+		if(actions == null) {
+			actions = new LinkedList<Action>();
+		}
+		actions.add(action);
+	}
+	
+	protected Action getNextAction(TestContext cx, Action previousAction) {
+		if(actions==null) {
+			throw new RuntimeException("No actions were specified for this test!");
+		}
+		if(actions.isEmpty()) {
+			return null;
+		}
+		return actions.remove();
+	}
 
-	@Override
-	public TestResult call() {
+	public TestResult call(TestContext cx) {
 		cx.newTest();
-		TestResult testResult = new TestResult(getTestName());
+		TestResult testResult = new TestResult(getName());
 		Action previousAction = null, action;
 		boolean lastActionPassed = true;
 		while(lastActionPassed && (action = getNextAction(cx, previousAction)) != null) {
@@ -40,9 +57,11 @@ public abstract class Test implements Callable<TestResult> {
 					action.validate(cx, actionResult.getContent());
 				}
 				catch (Exception e) {
-					log.error("Validation failed", e);
+					String fn = "error-content-" + Integer.toString(errNumber++) + ".txt";
+					log.error("Validation failed; content written to {}", fn, e);
 					actionResult.setFail(e.toString());
 					actionResult.setException(e);
+					Util.writeFile(cx.getLogDir(), fn, actionResult.getContent());
 				}
 				testResult.addActionResult(actionResult);
 				lastActionPassed = actionResult.isPassed();
@@ -51,7 +70,7 @@ public abstract class Test implements Callable<TestResult> {
 			catch (Exception e) {
 				log.error("Test failed", e);
 				e.printStackTrace();
-				ActionResult actionResult = new ActionResult(action.getClass().getSimpleName());
+				ActionResult actionResult = new ActionResult(action.getName());
 				actionResult.setFail(e.toString());
 				actionResult.setException(e);
 				testResult.addActionResult(actionResult);
@@ -75,8 +94,12 @@ public abstract class Test implements Callable<TestResult> {
 		// exists to be overridden
 	}
 
-	protected String getTestName() {
-		return this.getClass().getSimpleName();
+	public String getName() {
+		return this.name;
+	}
+
+	protected void setName(String name) {
+		this.name = name;
 	}
 
 }

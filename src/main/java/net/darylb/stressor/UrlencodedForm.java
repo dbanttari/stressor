@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
@@ -12,7 +13,7 @@ public class UrlencodedForm extends LinkedHashMap<String,String> {
 
 	private static final long serialVersionUID = -9070367608287370432L;
 
-	public StringEntity getEntity() {
+	public AbstractHttpEntity getEntity() {
 		return new StringEntity(this.toString(), ContentType.create("application/x-www-form-urlencoded"));
 	}
 	

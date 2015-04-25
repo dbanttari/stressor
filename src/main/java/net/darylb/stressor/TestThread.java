@@ -8,18 +8,25 @@ public class TestThread implements Runnable {
 	private static Logger log = LoggerFactory.getLogger(TestThread.class);
 
 	private TestContext cx;
-	private TestFactory testFactory;
+	private StoryFactory storyFactory;
 	private TestResults testResults;
 	private Thread thread;
 	private boolean isRunning = true;
 	private static int num = 1;
 
-	public TestThread(TestContext cx, TestFactory testFactory, TestResults testResults) {
+	private int maxIterations;
+
+	public TestThread(TestContext cx, StoryFactory testFactory, TestResults testResults) {
+		this(cx, testFactory, testResults, -1);
+	}
+	
+	public TestThread(TestContext cx, StoryFactory testFactory, TestResults testResults, int maxIterations) {
 		this.cx = cx;
-		this.testFactory = testFactory;
+		this.storyFactory = testFactory;
 		this.testResults = testResults;
+		this.maxIterations = maxIterations;
 		this.thread = new Thread(this);
-		this.thread.setName(testFactory.getClass().getSimpleName() + " TestThread " + Integer.toString(num++));
+		this.thread.setName(testFactory.getName() + " TestThread " + Integer.toString(num++));
 		this.thread.setDaemon(true);
 		this.thread.start();
 	}
@@ -43,20 +50,34 @@ public class TestThread implements Runnable {
 	public void run() {
 		log.info("Thread " + thread.getName() + " starting!");
 		while(isRunning) {
-			String testName = testFactory.getClass().getSimpleName();
+			String storyName = storyFactory.getClass().getSimpleName();
 			try {
-				Test test = testFactory.getTest(cx);
-				testName = test.getClass().getSimpleName();
-				log.info("Running test" + testName);
-				TestResult testResult = test.call();
+				Story story = storyFactory.getStory();
+				if(story==null) {
+					log.warn("Test factory {} exhausted", storyFactory.getName());
+					return;
+				}
+				log.info("Running test" + story.getName());
+				cx.newTest();
+				TestResult testResult = story.call(cx);
 				testResults.addResult(testResult);
 			}
 			catch(Throwable t) {
-				log.error("Error in " + testName, t);
+				log.error("Error in " + storyName, t);
 			}
+			isRunning = maxIterations == -1 || --maxIterations > 0;
 		}
 		log.info("Thread " + thread.getName() + " complete.");
 	}
 
+	public void join() {
+		try {
+			this.thread.join();
+		}
+		catch (InterruptedException e) {
+			log.warn("The wait for test thread completion was interrupted", e);
+			Thread.interrupted();
+		}
+	}
 
 }

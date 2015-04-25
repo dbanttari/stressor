@@ -1,60 +1,41 @@
 package net.darylb.stressor;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpPutAction extends AbstractHttpAction {
+public abstract class HttpPutAction extends AbstractHttpAction {
 
 	private static Logger log = LoggerFactory.getLogger(HttpPutAction.class);
 	
-	private final URI uri;
-	private HttpEntity httpEntity;
 	HttpResponse response;
-
-	public HttpPutAction(String path) {
-		try {
-			this.uri = new URI(path);
-		}
-		catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public HttpPutAction(String path, HttpEntity httpEntity) {
-		this(path);
-		this.httpEntity = httpEntity;
-	}
-	
-	public HttpPutAction(String uri, File file) {
-		this(uri, new FileEntity(file));
-		addHeader("Content-Type", "application/octet-stream");
-	}
-
-	protected void setHttpEntity(HttpEntity entity) {
-		this.httpEntity = entity;
-	}
 	
 	@Override
 	public ActionResult call(TestContext cx) {
-		log.debug("Storing " + getUri().toString());
-		ActionResult actionResult = doHttpRequest(cx, getUri());
-		log.debug("Completed " + uri.toString());
-		return actionResult;
+		String uriString = getUri(cx);
+		try {
+			URI uri = new URI(uriString);
+			log.debug("Storing {}", uri);
+			ActionResult actionResult = doHttpRequest(cx, uri);
+			log.debug("Completed {}", uri);
+			return actionResult;
+		}
+		catch (URISyntaxException e) {
+			log.warn("Invalid URI: {}", uriString);
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected ActionResult doHttpRequest(TestContext cx, URI uri) {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPut httpPut = new HttpPut(uri);
-		httpPut.setEntity(httpEntity);
+		httpPut.setEntity(getHttpEntity());
 		addRequestHeaders(httpPut);
 		try {
 			response = getHttpClient(cx).execute(httpPut);
@@ -80,9 +61,9 @@ public class HttpPutAction extends AbstractHttpAction {
 		return ret;
 	}
 
-	public URI getUri() {
-		return uri;
-	}
+	public abstract HttpEntity getHttpEntity();
+
+	public abstract String getUri(TestContext cx);
 
 	protected HttpResponse getResponse() {
 		return response;
