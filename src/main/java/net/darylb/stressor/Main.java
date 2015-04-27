@@ -1,6 +1,7 @@
 package net.darylb.stressor;
 
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,9 +21,16 @@ public class Main {
 			for(String arg : args) {
 				argsList.add(arg);
 			}
+			Properties props = new Properties();
+			Util.loadProperties(props);
 			TestDefinition testRunner;
 			try {
-				testRunner = (TestDefinition)Class.forName(argsList.remove()).newInstance();
+				if(props.containsKey("stressor.package")) {
+					testRunner = (TestDefinition)Class.forName(props.getProperty("stressor.package") + "." + argsList.remove()).newInstance();
+				}
+				else { 
+					testRunner = (TestDefinition)Class.forName(argsList.remove()).newInstance();
+				}
 			}
 			catch(Exception e) {
 				log.error("Could not instantiate TestRunner class", e);

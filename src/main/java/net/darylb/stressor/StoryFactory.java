@@ -20,9 +20,22 @@ public abstract class StoryFactory {
 		this.cx = cx;
 		this.name = this.getClass().getSimpleName();
 	}
+	
+	protected void useQuery(String sql) {
+		useQuery(sql, true);
+	}
 
-	protected void useQuery(String sql) throws SQLException {
-		resultSetQueue = new ResultSetQueue(cx, sql, true, 20);
+	public void useQuery(String sql, boolean isRepeatable) {
+		try {
+			resultSetQueue = new ResultSetQueue(cx, sql, true, 20);
+		}
+		catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	protected Object[] getNextRow() {
+		return resultSetQueue.getNextRow();
 	}
 	
 	public abstract Story getStory() throws Exception;
@@ -40,5 +53,6 @@ public abstract class StoryFactory {
 	protected void setName(String name) {
 		this.name = name;
 	}
+
 	
 }
