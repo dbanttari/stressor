@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public abstract class Action {
+public abstract class Action extends DatabaseHelper {
 
 	private String name;
 	

@@ -51,7 +51,9 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 			httpget.setHeader("Referer", referer);
 		}
 		HttpClient httpClient = super.getHttpClient(cx);
+		log.debug("Getting {}", uriString);
 		response = httpClient.execute(httpget);
+		log.debug("Get from {} complete", uriString);
 		int requestCount = 1;
 		while( (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302) && requestCount++ < MAX_REDIRECTS ) {
 			EntityUtils.consume(response.getEntity());

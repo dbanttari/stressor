@@ -94,7 +94,9 @@ public class ResultSetQueue implements Runnable {
 						if (!rs.next()) {
 							isRunning = false;
 						}
-						queuedResults.add(toArray(rs));
+						else {
+							queuedResults.add(toArray(rs));
+						}
 					}
 					else {
 						isRunning = false;

@@ -53,6 +53,9 @@ public abstract class Story {
 		while(lastActionPassed && (action = getNextAction(cx, previousAction)) != null) {
 			try {
 				ActionResult actionResult = action.call(cx);
+				if(actionResult==null) {
+					continue;
+				}
 				try {
 					action.validate(cx, actionResult.getContent());
 				}

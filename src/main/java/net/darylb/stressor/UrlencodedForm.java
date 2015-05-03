@@ -13,7 +13,7 @@ public class UrlencodedForm extends LinkedHashMap<String,String> {
 
 	private static final long serialVersionUID = -9070367608287370432L;
 
-	public AbstractHttpEntity getEntity() {
+	public AbstractHttpEntity toEntity() {
 		return new StringEntity(this.toString(), ContentType.create("application/x-www-form-urlencoded"));
 	}
 	

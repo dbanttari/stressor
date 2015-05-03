@@ -55,14 +55,20 @@ public abstract class HttpPostAction extends AbstractHttpAction {
 		}
 		addRequestHeaders(httpPost);
 		HttpClient httpClient = getHttpClient(cx);
+		log.debug("Posting to {}", uriString);
 		response = httpClient.execute(httpPost);
+		log.debug("Post to {} complete", uriString);
 		int hitCount = 1;
-		while(followRedirects && hitCount++ < MAX_REDIRECTS && (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302)) {
+		int statusCode = response.getStatusLine().getStatusCode();
+		while(followRedirects && hitCount++ < MAX_REDIRECTS && (statusCode == 301 || statusCode == 302)) {
 			EntityUtils.consume(response.getEntity());
 			super.parseCookies(response);
 			// redirects are always GETs.  Switch method
-			HttpGet httpGet = new HttpGet(uri.resolve(response.getLastHeader("Location").getValue()));
+			String location = response.getLastHeader("Location").getValue();
+			log.debug("Following {} redirect to {}", statusCode, location);
+			HttpGet httpGet = new HttpGet(uri.resolve(location));
 			response = httpClient.execute(httpGet);
+			statusCode = response.getStatusLine().getStatusCode();
 		}
 		super.parseCookies(response);
 		ret.setRequestCount(hitCount);

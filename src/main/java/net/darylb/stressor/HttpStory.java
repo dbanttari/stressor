@@ -8,7 +8,7 @@ public abstract class HttpStory extends Story {
 	protected void onTestComplete(TestContext cx) {
 		super.onTestComplete(cx);
 		if(cx.hasTestObject("http.client")) {
-			((HttpClient)cx.getTestObject("http.client")).getConnectionManager().shutdown();
+			((HttpClient)cx.getStoryObject("http.client")).getConnectionManager().shutdown();
 		}
 	}
 

@@ -19,9 +19,7 @@ public abstract class TestDefinition {
 	public abstract StoryFactory getStoryFactory(TestContext cx);
 	
 	public TestContext getTestContext() {
-		TestContext ret = new TestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
-		Util.loadProperties(ret);
-		return ret;
+		return new TestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
 	}
 	
 }

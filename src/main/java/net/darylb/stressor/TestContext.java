@@ -23,8 +23,9 @@ public class TestContext extends Properties {
 	public TestContext(String name, String logDir) {
 		this.name = name;
 		this.logDir = new File(logDir);
+		Util.loadProperties(this);
 	}
-
+	
 	public File getLogDir() {
 		return logDir;
 	}
@@ -49,11 +50,11 @@ public class TestContext extends Properties {
 		return ret;
 	}
 	
-	public void setTestObject(String key, Object value) {
+	public void setStoryObject(String key, Object value) {
 		testProperties.get().put(key, value);
 	}
 	
-	public Object getTestObject(String key) {
+	public Object getStoryObject(String key) {
 		Object ret = testProperties.get().get(key);
 		if(ret==null) {
 			throw new RuntimeException("Missing test object: " + key);

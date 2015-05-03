@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class StoryFactory {
+public abstract class StoryFactory extends DatabaseHelper {
 	
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(StoryFactory.class);
@@ -16,9 +16,12 @@ public abstract class StoryFactory {
 
 	ResultSetQueue resultSetQueue;
 	
+	ThreadLocalConnectionPool pool;
+	
 	public StoryFactory(TestContext cx) {
 		this.cx = cx;
 		this.name = this.getClass().getSimpleName();
+		pool = new ThreadLocalConnectionPool(cx);
 	}
 	
 	protected void useQuery(String sql) {
@@ -44,6 +47,7 @@ public abstract class StoryFactory {
 		if(resultSetQueue != null) {
 			resultSetQueue.shutdown();
 		}
+		pool.shutdown();
 	}
 
 	public String getName() {

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHttpAction extends Action {
 
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(AbstractHttpAction.class);
 	
 	LinkedHashMap<String, Cookie> cookies;
@@ -27,7 +28,7 @@ public abstract class AbstractHttpAction extends Action {
 		for(Header header : response.getAllHeaders()) {
 			if(header.getName().equalsIgnoreCase("Set-Cookie")) {
 				Cookie c = new Cookie(header.getValue());
-				log.debug("cookie " + c.name.toLowerCase() + ": " + c.value);
+				//log.debug("cookie " + c.name.toLowerCase() + ": " + c.value);
 				cookies.put(c.name.toLowerCase(), c);
 			}
 		}
@@ -79,13 +80,19 @@ public abstract class AbstractHttpAction extends Action {
 	HttpClient getHttpClient(TestContext cx) {
 		HttpClient ret;
 		if(cx.hasTestObject("http.client")) {
-			ret = (HttpClient)cx.getTestObject("http.client");
+			ret = (HttpClient)cx.getStoryObject("http.client");
 		}
 		else {
 			ret = new ReferringHttpClient();
-			cx.setTestObject("http.client", ret);
+			cx.setStoryObject("http.client", ret);
 		}
 		return ret;
 	}
+
+	private static volatile int responseCount=0;
+	public void logResponse(TestContext cx, String content) {
+		Util.writeFile(cx.getLogDir(), "response-"+Integer.toString(++responseCount)+".html", content);
+	}
+
 
 }
