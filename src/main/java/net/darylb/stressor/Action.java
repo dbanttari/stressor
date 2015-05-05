@@ -22,7 +22,7 @@ public abstract class Action extends DatabaseHelper {
 	 * @param content
 	 * @return
 	 */
-	protected void validate(TestContext cx, String content) throws Exception {
+	public void validate(TestContext cx, String content) throws Exception {
 	}
 	
 	protected static void invalid(String reason) throws TestValidationException {

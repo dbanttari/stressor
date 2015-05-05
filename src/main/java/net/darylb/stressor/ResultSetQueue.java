@@ -35,6 +35,7 @@ public class ResultSetQueue implements Runnable {
 		connect();
 		thread = new Thread(this);
 		thread.setName("ResultSetQueue");
+		thread.setDaemon(true);
 		thread.start();
 	}
 
