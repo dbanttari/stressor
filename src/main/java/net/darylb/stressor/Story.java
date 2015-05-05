@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Story {
+public abstract class Story extends TestHelper {
 
 	private static Logger log = LoggerFactory.getLogger(Story.class);
 	

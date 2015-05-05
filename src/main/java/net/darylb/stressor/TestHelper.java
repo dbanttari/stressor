@@ -6,7 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DatabaseHelper {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TestHelper {
+	
+	@SuppressWarnings("unused")
+	private static Logger log = LoggerFactory.getLogger(TestHelper.class);
 	
 	static ThreadLocalConnectionPool pool;
 	
@@ -92,6 +98,29 @@ public class DatabaseHelper {
 		s = ps;
 		int ret = ps.executeUpdate();
 		return ret;
+	}
+	
+	public ActionResult runAction(TestContext cx, Action action) {
+		ActionResult ret = action.call(cx);
+		if(ret != null) {
+			try {
+				action.validate(cx, ret.getContent());
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return ret;
+	}
+	
+	public void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		}
+		catch (InterruptedException e) {
+			// clear interrupted flag
+			Thread.interrupted();
+		}
 	}
 	
 }

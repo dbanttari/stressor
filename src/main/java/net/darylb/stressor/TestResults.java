@@ -55,12 +55,13 @@ public class TestResults {
 				if(statusCode >= 500) {
 					String content = actionResult.getContent();
 					if(content != null) {
+						log.warn("{} response received from {}", statusCode, actionResult.getName());
 						String fn = "errorPage" + actionCount + "." + statusCode + ".html";
 						Util.writeFile(cx.getLogDir(), fn, content);
 						errorPages.add(fn);
 					}
 					else {
-						log.warn("{} response received from {}", statusCode, actionResult.getName());
+						log.warn("{} response (but no body content) received from {}", statusCode, actionResult.getName());
 					}
 				}
 				//System.out.println(actionResult.getDurationMs());

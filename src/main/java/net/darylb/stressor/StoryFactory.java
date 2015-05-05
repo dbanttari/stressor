@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class StoryFactory extends DatabaseHelper {
+public abstract class StoryFactory extends TestHelper {
 	
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(StoryFactory.class);

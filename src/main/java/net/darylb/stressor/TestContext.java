@@ -90,7 +90,6 @@ public class TestContext extends Properties {
 		connections.add(ret);
 		return ret;
 	}
-	
 
 	public void shutdown() {
 		for(Connection c : connections) {
