@@ -21,7 +21,7 @@ public abstract class StoryFactory extends TestHelper {
 	private String name;
 
 	ResultSetQueue resultSetQueue;
-	
+
 	public StoryFactory(TestContext cx) {
 		this.cx = cx;
 		this.name = this.getClass().getSimpleName();
@@ -92,5 +92,9 @@ public abstract class StoryFactory extends TestHelper {
 		this.name = name;
 	}
 
+	public Story getRateLimitedStory() throws Exception {
+		cx.limitRate();
+		return getStory();
+	}
 	
 }

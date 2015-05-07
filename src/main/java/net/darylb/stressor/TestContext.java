@@ -55,6 +55,8 @@ public class TestContext extends Properties {
 	public void setNumThreads(int numThreads) {
 		this.numThreads = numThreads;
 	}
+
+	
 	
 	public File getLogDir() {
 		return logDir;
@@ -223,6 +225,17 @@ public class TestContext extends Properties {
 	public void close() {
 		if(pool != null) {
 			pool.close();
+		}
+	}
+	
+	/****  Rate Limiting ****/
+	private RateLimiter rateLimiter;
+	protected void setRateLimiter(RateLimiter rateLimiter) {
+		this.rateLimiter = rateLimiter;
+	}
+	public void limitRate() {
+		if(rateLimiter != null) {
+			rateLimiter.limitRate();
 		}
 	}
 }

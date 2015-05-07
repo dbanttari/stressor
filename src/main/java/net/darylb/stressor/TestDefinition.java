@@ -41,5 +41,16 @@ public abstract class TestDefinition {
 	public TestContext getTestContext() {
 		return new TestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
 	}
+
+	/**
+	 * By default, tests are not rate limited.  To set a rate limit, return a
+	 * RateLimiter that will limit the rate as needed.
+	 * @return a RateLimiter configured to your needs
+	 * @see #RateLimiterImpl
+	 */
+	public RateLimiterImpl getRateLimiter() {
+		// by default, use no rate limit. 
+		return null;
+	}
 	
 }

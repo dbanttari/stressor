@@ -16,7 +16,9 @@ public abstract class LoadTest {
 	private final int numIterationsPerThread;
 
 	public LoadTest(TestDefinition testRunner, int numThreads, int numIterationsPerThread) {
-		this.cx = testRunner.getTestContext();
+		this.numThreads = numThreads;
+		this.numIterationsPerThread = numIterationsPerThread;
+		cx = testRunner.getTestContext();
 		cx.setNumThreads(numThreads);
 		if(cx.containsKey("jdbc.driver")) {
 			try {
@@ -26,9 +28,8 @@ public abstract class LoadTest {
 				log.error("Could not load jdbc.driver", e);
 			}
 		}
-		this.testFactory = testRunner.getStoryFactory(cx);
-		this.numThreads = numThreads;
-		this.numIterationsPerThread = numIterationsPerThread;
+		cx.setRateLimiter(testRunner.getRateLimiter());
+		testFactory = testRunner.getStoryFactory(cx);
 	}
 	
 	public TestResults run() {
@@ -40,7 +41,7 @@ public abstract class LoadTest {
 		cx.newTest();
 		Story story;
 		try {
-			story = testFactory.getStory();
+			story = testFactory.getRateLimitedStory();
 		}
 		catch (Exception e) {
 			log.error("Warmup test failed; no Story provided by {}.", testFactory.getName(), e);

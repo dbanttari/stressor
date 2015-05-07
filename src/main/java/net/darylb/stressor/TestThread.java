@@ -52,7 +52,7 @@ public class TestThread implements Runnable {
 		while(isRunning) {
 			String storyName = storyFactory.getClass().getSimpleName();
 			try {
-				Story story = storyFactory.getStory();
+				Story story = storyFactory.getRateLimitedStory();
 				if(story==null) {
 					log.warn("Test factory {} exhausted", storyFactory.getName());
 					return;
