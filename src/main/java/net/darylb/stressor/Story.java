@@ -2,6 +2,9 @@ package net.darylb.stressor;
 
 import java.util.LinkedList;
 
+import net.darylb.stressor.actions.Action;
+import net.darylb.stressor.actions.ActionResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +89,6 @@ public abstract class Story extends TestHelper {
 		for(ActionResult actionResult : testResult.getActionResults()) {
 			actionResult.setContent(null);
 		}
-		
 		return testResult;
 	}
 	
@@ -94,7 +96,6 @@ public abstract class Story extends TestHelper {
 	 * If you want to use any actionResult.content do so here.  (eg to save error pages)
 	 */
 	protected void onTestComplete(TestContext cx) {
-		// exists to be overridden
 	}
 
 	public String getName() {

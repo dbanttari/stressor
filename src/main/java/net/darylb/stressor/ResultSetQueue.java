@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResultSetQueue implements Runnable {
-	
+
 	private static Logger log = LoggerFactory.getLogger(ResultSetQueue.class);
 
 	private Connection c;
@@ -67,7 +67,7 @@ public class ResultSetQueue implements Runnable {
 			}
 		}
 		long time = System.currentTimeMillis() - startTick;
-		if(time > 100) {
+		if (time > 100) {
 			log.warn("Took {}ms to fetch next row!", time);
 		}
 		return ret;
@@ -84,7 +84,7 @@ public class ResultSetQueue implements Runnable {
 	@Override
 	public void run() {
 		while (isRunning) {
-			while (queuedResults.size() < backlog) {
+			while (isRunning && queuedResults.size() < backlog) {
 				try {
 					if (rs.next()) {
 						queuedResults.add(toArray(rs));
@@ -107,7 +107,6 @@ public class ResultSetQueue implements Runnable {
 					throw new RuntimeException(e);
 				}
 			}
-
 		}
 	}
 

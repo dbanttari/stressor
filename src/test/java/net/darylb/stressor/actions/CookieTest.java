@@ -1,6 +1,7 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import static org.junit.Assert.*;
+import net.darylb.stressor.actions.Cookie;
 
 import org.junit.Test;
 

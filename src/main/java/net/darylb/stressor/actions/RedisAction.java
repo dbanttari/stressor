@@ -1,5 +1,6 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
+import net.darylb.stressor.TestContext;
 import redis.clients.jedis.Jedis;
 
 public abstract class RedisAction extends Action {

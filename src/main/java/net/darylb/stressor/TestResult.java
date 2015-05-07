@@ -3,6 +3,8 @@ package net.darylb.stressor;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.darylb.stressor.actions.ActionResult;
+
 public class TestResult {
 
 	private static int nextResultNumber = 1;

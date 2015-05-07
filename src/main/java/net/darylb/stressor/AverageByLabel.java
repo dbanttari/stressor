@@ -3,6 +3,8 @@ package net.darylb.stressor;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.darylb.stressor.actions.ActionResult;
+
 public class AverageByLabel {
 
 	private LinkedHashMap<String, Average> results = new LinkedHashMap<String, Average>();

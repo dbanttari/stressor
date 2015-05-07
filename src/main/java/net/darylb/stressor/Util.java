@@ -16,7 +16,7 @@ public class Util {
 	
 	private static Logger log = LoggerFactory.getLogger(Util.class);
 
-	static void writeFile(File path, String name, String content) {
+	public static void writeFile(File path, String name, String content) {
 		File f = new File(path, name);
 		FileOutputStream out;
 		try {
@@ -40,14 +40,14 @@ public class Util {
 			.append(nn(c.get(Calendar.SECOND)));
 		return timestamp.toString();
 	}
-	private static String nn(int n) {
+	public static String nn(int n) {
 		if(n < 10) {
 			return "0" + Integer.toString(n);
 		}
 		return Integer.toString(n);
 	}
 	
-	static void loadProperties(Properties props) {
+	public static void loadProperties(Properties props) {
 		File f = new File("stressor.properties");
 		if(f.exists()) {
 			InputStream in;

@@ -1,10 +1,14 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import net.darylb.stressor.ReferringHttpClient;
+import net.darylb.stressor.TestContext;
+import net.darylb.stressor.Util;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -16,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHttpAction extends Action {
 
+	protected HttpResponse response;
+	
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(AbstractHttpAction.class);
 	
@@ -79,7 +85,7 @@ public abstract class AbstractHttpAction extends Action {
 	
 	HttpClient getHttpClient(TestContext cx) {
 		HttpClient ret;
-		if(cx.hasTestObject("http.client")) {
+		if(cx.hasStoryObject("http.client")) {
 			ret = (HttpClient)cx.getStoryObject("http.client");
 		}
 		else {
@@ -93,6 +99,5 @@ public abstract class AbstractHttpAction extends Action {
 	public void logResponse(TestContext cx, String content) {
 		Util.writeFile(cx.getLogDir(), "response-"+Integer.toString(++responseCount)+".html", content);
 	}
-
 
 }

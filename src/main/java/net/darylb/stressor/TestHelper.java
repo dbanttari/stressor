@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.darylb.stressor.actions.Action;
+import net.darylb.stressor.actions.ActionResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,20 +17,11 @@ public class TestHelper {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(TestHelper.class);
 	
-	static ThreadLocalConnectionPool pool;
-	
 	private Connection c;
 	
 	private ResultSet rs;
 
 	private Statement s;
-
-	protected Connection getConnection(TestContext cx) {
-		if(pool==null) {
-			pool = new ThreadLocalConnectionPool(cx);
-		}
-		return pool.get();
-	}
 
 	protected void closeResultSet(TestContext cx) {
 		try {
@@ -49,19 +43,19 @@ public class TestHelper {
 			e.printStackTrace();
 		}
 		// make sure we have a valid connection for the next iteration
-		if(c==null) {
-			c = getConnection(cx);
-		}
-		else
-			try {
+		try {
+			if(c==null) {
+				c = cx.getStoryConnection();
+			}
+			else
 				if (c.isClosed()) {
-					c = getConnection(cx);
+					c = cx.getStoryConnection();
 				}
 			}
-			catch (SQLException e) {
-				c = getConnection(cx);
-			}
-		
+		catch (SQLException e) {
+			// <shrug>
+			e.printStackTrace();
+		}
 	}
 	
 	protected ResultSet preparedQuery(TestContext cx, String sql, Object... params) throws SQLException {

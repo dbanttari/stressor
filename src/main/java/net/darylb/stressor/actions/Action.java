@@ -1,7 +1,10 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.darylb.stressor.TestContext;
+import net.darylb.stressor.TestHelper;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

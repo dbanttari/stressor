@@ -1,4 +1,6 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
+
+import net.darylb.stressor.TestContext;
 
 public class HttpGetActionImpl extends HttpGetAction {
 

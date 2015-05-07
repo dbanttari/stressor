@@ -1,8 +1,10 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import net.darylb.stressor.TestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -19,7 +21,6 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 	
 	private static final int MAX_REDIRECTS = 10;
 	private String referer;
-	private HttpResponse response;
 	
 	@Override
 	public ActionResult call(TestContext cx) {

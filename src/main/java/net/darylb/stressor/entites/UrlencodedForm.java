@@ -1,4 +1,4 @@
-package net.darylb.stressor;
+package net.darylb.stressor.entites;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

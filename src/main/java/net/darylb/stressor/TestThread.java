@@ -48,7 +48,7 @@ public class TestThread implements Runnable {
 
 	@Override
 	public void run() {
-		log.info("Thread " + thread.getName() + " starting!");
+		log.info("Thread {} starting!", thread.getName());
 		while(isRunning) {
 			String storyName = storyFactory.getClass().getSimpleName();
 			try {
@@ -57,17 +57,21 @@ public class TestThread implements Runnable {
 					log.warn("Test factory {} exhausted", storyFactory.getName());
 					return;
 				}
-				log.info("Running test" + story.getName());
+				log.info("Running test {}", story.getName());
 				cx.newTest();
 				TestResult testResult = story.call(cx);
 				testResults.addResult(testResult);
 			}
+			catch(TestOverException t) {
+				log.info("StoryFactory ran out of stories.");
+				maxIterations = 0;
+			}
 			catch(Throwable t) {
-				log.error("Error in " + storyName, t);
+				log.error("Error in {}", storyName, t);
 			}
 			isRunning = maxIterations == -1 || --maxIterations > 0;
 		}
-		log.info("Thread " + thread.getName() + " complete.");
+		log.info("Thread {} complete.", thread.getName());
 	}
 
 	public void join() {

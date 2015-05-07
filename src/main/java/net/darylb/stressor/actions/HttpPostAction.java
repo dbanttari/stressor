@@ -1,8 +1,10 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import net.darylb.stressor.TestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,7 +22,6 @@ public abstract class HttpPostAction extends AbstractHttpAction {
 
 	private static final int MAX_REDIRECTS = 10;
 	protected boolean followRedirects = true;
-	HttpResponse response;
 
 	@Override
 	public ActionResult call(TestContext cx) {
@@ -73,14 +74,17 @@ public abstract class HttpPostAction extends AbstractHttpAction {
 		super.parseCookies(response);
 		ret.setRequestCount(hitCount);
 		ret.setStatus(response.getStatusLine().getStatusCode());
-		if(response.getStatusLine().getStatusCode() != 200) {
-			String reason = "Response code " + response.getStatusLine().getStatusCode();
-			ret.setFail(reason);
-		}
+		String content = null;
 		HttpEntity entity = response.getEntity();
 		if (entity != null) {
-			String content = EntityUtils.toString(entity);
+			content = EntityUtils.toString(entity);
 	        ret.setContent(content);
+		}
+		int responseCode = response.getStatusLine().getStatusCode();
+		if(responseCode != 200) {
+			String reason = "Response code " + responseCode;
+			log.warn("Response status {} produced content: {}", response.getStatusLine(), content);
+			ret.setFail(reason);
 		}
 		return ret;
 	}

@@ -81,7 +81,7 @@ public abstract class LoadTest {
 		ret.testEnded();
 		Util.writeFile(cx.getLogDir(), "index.html", ret.toHtml());
 		testFactory.shutdown();
-		cx.shutdown();
+		cx.close();
 		log.info("{} Results.", ret.size());
 		return ret;
 	}

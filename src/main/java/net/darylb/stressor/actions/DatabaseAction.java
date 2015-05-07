@@ -1,7 +1,9 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import net.darylb.stressor.TestContext;
 
 public abstract class DatabaseAction extends Action {
 
@@ -10,8 +12,9 @@ public abstract class DatabaseAction extends Action {
 	public ActionResult call(TestContext cx) {
 		ActionResult ret = null;
 		try {
-			ret = call(cx, super.getConnection(cx));
-			super.closeResultSet(cx);
+			Connection c = cx.getStoryConnection();
+			ret = call(cx, c);
+			c.close();
 		}
 		catch (SQLException e) {
 			e.printStackTrace();

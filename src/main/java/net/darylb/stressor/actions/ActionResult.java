@@ -1,4 +1,4 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 public class ActionResult {
 

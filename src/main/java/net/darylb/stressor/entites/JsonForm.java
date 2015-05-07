@@ -1,4 +1,4 @@
-package net.darylb.stressor;
+package net.darylb.stressor.entites;
 
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;

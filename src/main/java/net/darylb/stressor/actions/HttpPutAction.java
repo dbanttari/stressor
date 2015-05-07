@@ -1,7 +1,9 @@
-package net.darylb.stressor;
+package net.darylb.stressor.actions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import net.darylb.stressor.TestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -13,8 +15,6 @@ import org.slf4j.LoggerFactory;
 public abstract class HttpPutAction extends AbstractHttpAction {
 
 	private static Logger log = LoggerFactory.getLogger(HttpPutAction.class);
-	
-	HttpResponse response;
 	
 	@Override
 	public ActionResult call(TestContext cx) {
