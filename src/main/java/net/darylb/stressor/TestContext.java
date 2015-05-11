@@ -70,7 +70,7 @@ public class TestContext extends Properties {
 	 * Called at the start of every test; will close any connections
 	 * left over from the previous test that used this thread
 	 */
-	public void newTest() {
+	public void newStory() {
 		LinkedList<Connection> _storyConnections = storyConnections.get();
 		for(Connection c : _storyConnections) {
 			try {
@@ -81,6 +81,8 @@ public class TestContext extends Properties {
 			}
 		}
 		_storyConnections.clear();
+		// make sure the new story gets new story properties every time
+		storyProperties.set(new HashMap<String,Object>());
 	}
 
 	/**
@@ -231,7 +233,10 @@ public class TestContext extends Properties {
 	/****  Rate Limiting ****/
 	private RateLimiter rateLimiter;
 	protected void setRateLimiter(RateLimiter rateLimiter) {
-		this.rateLimiter = rateLimiter;
+		if(rateLimiter != null) {
+			log.info("Rate limit set via {}", rateLimiter.getClass().getSimpleName());
+			this.rateLimiter = rateLimiter;
+		}
 	}
 	public void limitRate() {
 		if(rateLimiter != null) {

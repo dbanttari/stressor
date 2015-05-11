@@ -12,7 +12,7 @@ public abstract class Story extends TestHelper {
 
 	private static Logger log = LoggerFactory.getLogger(Story.class);
 	
-	private TestResult testResult;
+	private StoryResult testResult;
 
 	private String name;
 	
@@ -22,11 +22,11 @@ public abstract class Story extends TestHelper {
 		this.name = this.getClass().getSimpleName();
 	}
 	
-	public TestResult getTestResult() {
+	public StoryResult getTestResult() {
 		return testResult;
 	}
 
-	public void setTestResult(TestResult testResult) {
+	public void setTestResult(StoryResult testResult) {
 		this.testResult = testResult;
 	}
 
@@ -48,9 +48,9 @@ public abstract class Story extends TestHelper {
 		return actions.remove();
 	}
 
-	public TestResult call(TestContext cx) {
-		cx.newTest();
-		TestResult testResult = new TestResult(getName());
+	public StoryResult call(TestContext cx) {
+		cx.newStory();
+		StoryResult testResult = new StoryResult(getName());
 		Action previousAction = null, action;
 		boolean lastActionPassed = true;
 		while(lastActionPassed && (action = getNextAction(cx, previousAction)) != null) {

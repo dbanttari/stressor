@@ -12,7 +12,7 @@ public abstract class LoadTest {
 	
 	private final int numThreads;
 	private final TestContext cx;
-	private final StoryFactory testFactory;
+	private final StoryFactory storyFactory;
 	private final int numIterationsPerThread;
 
 	public LoadTest(TestDefinition testRunner, int numThreads, int numIterationsPerThread) {
@@ -20,16 +20,8 @@ public abstract class LoadTest {
 		this.numIterationsPerThread = numIterationsPerThread;
 		cx = testRunner.getTestContext();
 		cx.setNumThreads(numThreads);
-		if(cx.containsKey("jdbc.driver")) {
-			try {
-				Class.forName(cx.getProperty("jdbc.driver"));
-			}
-			catch (ClassNotFoundException e) {
-				log.error("Could not load jdbc.driver", e);
-			}
-		}
 		cx.setRateLimiter(testRunner.getRateLimiter());
-		testFactory = testRunner.getStoryFactory(cx);
+		storyFactory = testRunner.getStoryFactory(cx);
 	}
 	
 	public TestResults run() {
@@ -37,54 +29,54 @@ public abstract class LoadTest {
 		
 		// do one test as a warmup
 		log.info("Running warmup test");
-		TestResults ret = new TestResults(cx);
-		cx.newTest();
+		TestResults testResults = new TestResults(cx);
+		cx.newStory();
 		Story story;
 		try {
-			story = testFactory.getRateLimitedStory();
+			story = storyFactory.getRateLimitedStory();
 		}
 		catch (Exception e) {
-			log.error("Warmup test failed; no Story provided by {}.", testFactory.getName(), e);
-			return ret;
+			log.error("Warmup test failed; no Story provided by {}.", storyFactory.getName(), e);
+			return testResults;
 		}
 		if(story==null) {
-			log.error("Warmup test failed; no story provided by {}.", testFactory.getName());
-			return ret;			
+			log.error("Warmup test failed; no story provided by {}.", storyFactory.getName());
+			return testResults;			
 		}
 		log.debug("Running warmup story {}", story.getName());
-		TestResult result;
+		StoryResult storyResult;
 		try {
-			result = story.call(cx);
+			storyResult = story.call(cx);
 		}
 		catch(Throwable t) {
 			log.error("Warmup test threw exception", t);
-			result = new TestResult(story.getName());
-			result.setException(t);
-			result.setPassed(false);
+			storyResult = new StoryResult(story.getName());
+			storyResult.setException(t);
+			storyResult.setPassed(false);
 		}
-		ret.addResult(result);
-		if(!result.isPassed()) {
+		testResults.addResult(storyResult);
+		if(!storyResult.isPassed()) {
 			log.error("Warmup test failed; aborting.");
-			return ret;
+			return testResults;
 		}
 		log.info("Warmup test passed.");
 		
 		// run the rest of the tests
-		ret.testStarting();
+		testResults.testStarting();
 		LinkedList<TestThread> threads = new LinkedList<TestThread>();
 		for(int i=0; i < numThreads; ++i) {
-			threads.add(new TestThread(cx, testFactory, ret, numIterationsPerThread));
+			threads.add(new TestThread(cx, storyFactory, testResults, numIterationsPerThread));
 		}
 		
 		// implementer decides when the test completes
-		runTests(cx, testFactory, threads, ret);
+		runTests(cx, storyFactory, threads, testResults);
 		
-		ret.testEnded();
-		Util.writeFile(cx.getLogDir(), "index.html", ret.toHtml());
-		testFactory.shutdown();
+		testResults.testEnded();
+		Util.writeFile(cx.getLogDir(), "index.html", testResults.toHtml());
+		storyFactory.shutdown();
 		cx.close();
-		log.info("{} Results.", ret.size());
-		return ret;
+		log.info("{} Results.", testResults.size());
+		return testResults;
 	}
 	
 	public abstract void runTests(TestContext cx, StoryFactory testFactory, List<TestThread> threads, TestResults ret);

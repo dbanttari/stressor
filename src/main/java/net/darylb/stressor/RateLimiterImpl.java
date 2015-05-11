@@ -18,6 +18,7 @@ public class RateLimiterImpl implements RateLimiter, Runnable {
 	private long minTimeMs;
 	private Thread thread;
 	private volatile boolean allowNext = true;
+	private long nextWakeupTick;
 
 	public RateLimiterImpl(long count, Interval interval) {
 		this(interval.getIntervalMs() / count);
@@ -25,12 +26,13 @@ public class RateLimiterImpl implements RateLimiter, Runnable {
 	
 	public RateLimiterImpl(long minTimeMs) {
 		this.minTimeMs = minTimeMs;
-		if(minTimeMs > 0) {
-			this.thread = new Thread(this);
-			this.thread.setName("Rate Limiter (" + minTimeMs + "ms)");
-			this.thread.setDaemon(true);
-			this.thread.start();
+		if(minTimeMs < 10) {
+			throw new IllegalArgumentException("Interval too short to implement");
 		}
+		this.thread = new Thread(this);
+		this.thread.setName("Rate Limiter (" + minTimeMs + "ms)");
+		this.thread.setDaemon(true);
+		this.thread.start();
 	}
 
 	public void limitRate() {
@@ -59,13 +61,16 @@ public class RateLimiterImpl implements RateLimiter, Runnable {
 	
 	@Override
 	public void run() {
+		nextWakeupTick = System.currentTimeMillis() + minTimeMs;
 		while(true) {
 			try {
-				Thread.sleep(minTimeMs);
+				// we have about 5ms overhead in the loop
+				Thread.sleep(nextWakeupTick - System.currentTimeMillis());
 			}
 			catch (InterruptedException e) {
 				Thread.interrupted();
 			}
+			nextWakeupTick += minTimeMs;
 			synchronized(this) {
 				allowNext = true;
 				// wake up one waiting thread (if applicable)

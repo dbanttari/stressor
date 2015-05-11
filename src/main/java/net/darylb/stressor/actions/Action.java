@@ -18,6 +18,11 @@ public abstract class Action extends TestHelper {
 		this.name = this.getClass().getSimpleName();
 	}
 	
+	/**
+	 * Implement to perform the action required by the story.
+	 * @param cx
+	 * @return an ActionResult object indicating whether the test succeeded
+	 */
 	public abstract ActionResult call(TestContext cx);
 	
 	/**
@@ -28,22 +33,51 @@ public abstract class Action extends TestHelper {
 	public void validate(TestContext cx, String content) throws Exception {
 	}
 	
+	/**
+	 * Helper method to throw a TestValidationException with the given reason string.
+	 * @param reason The reason this test is invalid
+	 * @throws TestValidationException
+	 */
 	protected static void invalid(String reason) throws TestValidationException {
 		throw new TestValidationException(reason);
 	}
 
+	/**
+	 * Helper method to throw a TestValidationException with the given reason string and 'caused by' exception.
+	 * @param reason The reason this test is invalid
+	 * @param t the exception causing this validation failure
+	 * @throws TestValidationException
+	 */
 	protected static void invalid(String reason, Throwable t) throws TestValidationException {
 		throw new TestValidationException(reason, t);
 	}
 
+	/**
+	 * Helper method to throw a TestValidationException with the given 'caused by' exception.
+	 * @param t the exception causing this validation failure
+	 * @throws TestValidationException
+	 */
 	protected static void invalid(Throwable t) throws TestValidationException {
 		throw new TestValidationException(t);
 	}
 	
-	public String findString(Pattern p, String content) {
-		return findString(p, content, "Pattern not found.");
+	/**
+	 * Searches the content and returns the first capture group in the pattern supplied, or throws a RuntimeException if not found.
+	 * @param content the content to apply the pattern to
+	 * @param p the pattern to match.  Should include one capture group.
+	 * @return the value of the first capture group matched.
+	 */
+	public String findString(String content, Pattern p) {
+		return findString(content, p, "Pattern not found.");
 	}
-	public String findString(Pattern p, String content, String errorMessage) {
+	/**
+	 * Searches the content and returns the first capture group in the pattern supplied, or throws a RuntimeException if not found.
+	 * @param content the content to apply the pattern to
+	 * @param p the pattern to match.  Should include one capture group.
+	 * @param errorMessage the message 
+	 * @return the value of the first capture group matched.
+	 */
+	public String findString(String content, Pattern p, String errorMessage) {
 		if(content==null) {
 			invalid("No content returned from action " + this.getClass().getSimpleName());
 		}
@@ -54,10 +88,23 @@ public abstract class Action extends TestHelper {
 		throw new RuntimeException(errorMessage);
 	}
 	
-	public static String[] findStrings(Pattern p, String content) {
-		return findStrings(p, content, "Pattern not found.");
+	/**
+	 * Will return every capture group in the content for the pattern supplied, or throw a RuntimeException if not found.
+	 * @param p the pattern to match.  Should include one capture group.
+	 * @param content the content to apply the pattern to
+	 * @return the value of the first capture group matched.
+	 */
+	public static String[] findStrings(String content, Pattern p) {
+		return findStrings(content, p, "Pattern not found.");
 	}
-	public static String[] findStrings(Pattern p, String content, String errorMessage) {
+	/**
+	 * Will return every capture group in the content for the pattern supplied, or throw a RuntimeException if not found.
+	 * @param p the pattern to match.  Should include one capture group.
+	 * @param content the content to apply the pattern to
+	 * @param errorMessage the error message used in the RuntimeException generated if the pattern isn't found
+	 * @return the value of the first capture group matched.
+	 */
+	public static String[] findStrings(String content, Pattern p, String errorMessage) {
 		Matcher m = p.matcher(content);
 		if(m.find()) {
 			int count = m.groupCount();
@@ -71,9 +118,22 @@ public abstract class Action extends TestHelper {
 	}
 	
 
+	/**
+	 * Will attempt to find the value of the named element in the content, once parsed as JSON
+	 * @param content the raw JSON-formatted string
+	 * @param elementName the name of the top-level element being looked for
+	 * @return the value of that element
+	 */
 	public static String findJson(String content, String elementName) {
 		return findJson(content, elementName, "Value not found in JSON");
 	}
+	/**
+	 * Will attempt to find the value of the named element in the content, once parsed as JSON
+	 * @param content the raw JSON-formatted string
+	 * @param elementName the name of the top-level element being looked for
+	 * @param message the message to display in the RuntimeException generated if the element isn't found
+	 * @return the value of that element
+	 */
 	public static String findJson(String content, String elementName, String message) {
 		JSONParser parser = new JSONParser();
 		JSONObject json;

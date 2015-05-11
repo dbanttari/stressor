@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.darylb.stressor.actions.ActionResult;
 
-public class TestResult {
+public class StoryResult {
 
 	private static int nextResultNumber = 1;
 	private int resultNumber = nextResultNumber++;
@@ -38,7 +38,7 @@ public class TestResult {
 		return ret.toString();
 	}
 	
-	TestResult(String name) {
+	StoryResult(String name) {
 		this.name = name;
 	}
 	

@@ -11,6 +11,26 @@ public class TimedLoadTest extends LoadTest {
 	
 	private final long endTick;
 	
+	public TimedLoadTest(TestDefinition testRunner, int numThreads, String duration) {
+		this(testRunner, numThreads, parseDuration(duration));
+	}
+	
+	private static long parseDuration(String duration) {
+		long num = Long.parseLong(duration.substring(0, duration.length()-1));
+		char interval = duration.charAt(duration.length()-1);
+		switch(interval) {
+		case 's':
+			return num * 1000L;
+		case 'm':
+			return num * 60L * 1000L;
+		case 'h':
+			return num * 60L * 60L * 1000L;
+		case 'd':
+			return num * 24L * 60L * 60L * 1000L;
+		}
+		throw new IllegalArgumentException("Invalid duration string.  should be ");
+	}
+
 	public TimedLoadTest(TestDefinition testRunner, int numThreads, long duration) {
 		super(testRunner, numThreads, -1);
 		this.endTick = System.currentTimeMillis() + duration;

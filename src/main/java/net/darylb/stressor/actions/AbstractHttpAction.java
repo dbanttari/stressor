@@ -85,12 +85,12 @@ public abstract class AbstractHttpAction extends Action {
 	
 	HttpClient getHttpClient(TestContext cx) {
 		HttpClient ret;
-		if(cx.hasStoryObject("http.client")) {
-			ret = (HttpClient)cx.getStoryObject("http.client");
+		if(cx.hasStoryObject(Props.HTTP_CLIENT)) {
+			ret = (HttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
 		}
 		else {
 			ret = new ReferringHttpClient();
-			cx.setStoryObject("http.client", ret);
+			cx.setStoryObject(Props.HTTP_CLIENT, ret);
 		}
 		return ret;
 	}

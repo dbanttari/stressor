@@ -49,27 +49,29 @@ public class TestThread implements Runnable {
 	@Override
 	public void run() {
 		log.info("Thread {} starting!", thread.getName());
+		String storyFactoryName = storyFactory.getClass().getSimpleName();
 		while(isRunning) {
-			String storyName = storyFactory.getClass().getSimpleName();
 			try {
 				Story story = storyFactory.getRateLimitedStory();
 				if(story==null) {
 					log.warn("Test factory {} exhausted", storyFactory.getName());
+					isRunning=false;
 					return;
 				}
-				log.info("Running test {}", story.getName());
-				cx.newTest();
-				TestResult testResult = story.call(cx);
+				log.debug("Running test {}", story.getName());
+				cx.newStory();
+				StoryResult testResult = story.call(cx);
 				testResults.addResult(testResult);
 			}
 			catch(TestOverException t) {
 				log.info("StoryFactory ran out of stories.");
-				maxIterations = 0;
+				isRunning = false;
 			}
 			catch(Throwable t) {
-				log.error("Error in {}", storyName, t);
+				log.error("Error in {}", storyFactoryName, t);
 			}
-			isRunning = maxIterations == -1 || --maxIterations > 0;
+			// don't override isRunning if shutdown() or TestOverException set it false
+			isRunning = isRunning && (maxIterations == -1 || --maxIterations > 0);
 		}
 		log.info("Thread {} complete.", thread.getName());
 	}

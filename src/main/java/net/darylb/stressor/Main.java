@@ -75,27 +75,7 @@ public class Main {
 		p = Pattern.compile("^([0-9]+)([dhms])$");
 		match = p.matcher(testDuration);
 		if(match.matches()) {
-			long num = Long.parseLong(match.group(1));
-			char interval = match.group(2).toLowerCase().charAt(0);
-			long duration;
-			switch(interval) {
-			case 's':
-				duration = num * 1000L;
-				break;
-			case 'm':
-				duration = num * 60L * 1000L;
-				break;
-			case 'h':
-				duration = num * 60L * 60L * 1000L;
-				break;
-			case 'd':
-				duration = num * 24L * 60L * 60L * 1000L;
-				break;
-			default:
-				printHelp();
-				return null;
-			}
-			return new TimedLoadTest(testRunner, threads, duration);
+			return new TimedLoadTest(testRunner, threads, testDuration);
 		}
 		
 		return null;

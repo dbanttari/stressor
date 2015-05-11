@@ -37,7 +37,7 @@ public class TestResults {
 		this.cx = cx;
 	}
 
-	synchronized public void addResult(TestResult testResult) {
+	synchronized public void addResult(StoryResult testResult) {
 		if (testResult == null) {
 			nullResultCount++;
 			System.out.println("Null result!");
