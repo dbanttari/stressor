@@ -18,12 +18,12 @@ public abstract class RedisAction extends Action {
 	public ActionResult call(TestContext cx) {
 		Jedis jedis;
 		if(jedisPool==null) {
-			log.info("Connecting to Redis host {}", cx.getProperty("jedis.host"));
+			log.info("Connecting to Redis host {}", cx.getProperty(Props.JEDIS_HOST));
 			JedisPoolConfig poolConfig = new JedisPoolConfig();
 			poolConfig.setMaxTotal(4+cx.getNumThreads()*2); // maximum active connections
 			poolConfig.setMinIdle(1);
 			poolConfig.setTestOnBorrow(true);
-			jedisPool = new JedisPool(poolConfig, cx.getProperty("jedis.host"), 6379, 10);
+			jedisPool = new JedisPool(poolConfig, cx.getProperty(Props.JEDIS_HOST), 6379, 10);
 			long startTick = System.currentTimeMillis();
 			jedis = jedisPool.getResource();
 			long dur = System.currentTimeMillis() - startTick;

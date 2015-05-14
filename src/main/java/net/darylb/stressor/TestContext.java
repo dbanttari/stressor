@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
 
+import net.darylb.stressor.actions.Props;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,18 +173,18 @@ public class TestContext extends Properties {
 	
 	private void createPool() {
 		if(this.containsKey("jdbc.driver")) {
-			log.info("Initializing {} connection pool", this.getProperty("jdbc.driver"));
+			log.info("Initializing {} connection pool", this.getProperty(Props.JDBC_DRIVER));
 			pool = new ComboPooledDataSource();
 			try {
-				pool.setDriverClass(this.getProperty("jdbc.driver"));
+				pool.setDriverClass(this.getProperty(Props.JDBC_DRIVER));
 			}
 			catch (PropertyVetoException e) {
 				throw new RuntimeException(e);
 			}
-			pool.setJdbcUrl(this.getProperty("jdbc.url"));
-			if(this.containsKey("jdbc.username")) {
-				pool.setUser(this.getProperty("jdbc.username"));
-				pool.setPassword(this.getProperty("jdbc.password"));
+			pool.setJdbcUrl(this.getProperty(Props.JDBC_URL));
+			if(this.containsKey(Props.JDBC_USERNAME)) {
+				pool.setUser(this.getProperty(Props.JDBC_USERNAME));
+				pool.setPassword(this.getProperty(Props.JDBC_PASSWORD));
 			}
 			int numThreads = getNumThreads();
 			log.info("Num threads: {}", numThreads);
@@ -243,4 +245,5 @@ public class TestContext extends Properties {
 			rateLimiter.limitRate();
 		}
 	}
+
 }

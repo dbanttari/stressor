@@ -5,6 +5,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.darylb.stressor.actions.Props;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ public class Main {
 			TestDefinition testRunner;
 			try {
 				if(props.containsKey("stressor.package")) {
-					testRunner = (TestDefinition)Class.forName(props.getProperty("stressor.package") + "." + argsList.remove()).newInstance();
+					testRunner = (TestDefinition)Class.forName(props.getProperty(Props.STRESSOR_PACKAGE) + "." + argsList.remove()).newInstance();
 				}
 				else { 
 					testRunner = (TestDefinition)Class.forName(argsList.remove()).newInstance();
