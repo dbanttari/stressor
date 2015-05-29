@@ -19,7 +19,7 @@ public class ResultSetQueue implements Runnable {
 	private ResultSet rs;
 	private String sql;
 	private boolean isQueryRepeatable;
-	private TestContext cx;
+	private LoadTestContext cx;
 	private int columnCount;
 	private int backlog;
 	private boolean isRunning = true;
@@ -27,7 +27,7 @@ public class ResultSetQueue implements Runnable {
 
 	private Thread thread;
 
-	public ResultSetQueue(TestContext cx, String sql, boolean isQueryRepeatable, int backlog) throws SQLException {
+	public ResultSetQueue(LoadTestContext cx, String sql, boolean isQueryRepeatable, int backlog) throws SQLException {
 		this.cx = cx;
 		this.sql = sql;
 		this.isQueryRepeatable = isQueryRepeatable;

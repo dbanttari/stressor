@@ -8,7 +8,7 @@ import net.darylb.stressor.actions.ActionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Story extends TestHelper {
+public abstract class Story extends LoadTestHelper {
 
 	private static Logger log = LoggerFactory.getLogger(Story.class);
 	
@@ -38,7 +38,7 @@ public abstract class Story extends TestHelper {
 		actions.add(action);
 	}
 	
-	protected Action getNextAction(TestContext cx, Action previousAction) {
+	protected Action getNextAction(LoadTestContext cx, Action previousAction) {
 		if(actions==null) {
 			throw new RuntimeException("No actions were specified for this test!");
 		}
@@ -48,7 +48,7 @@ public abstract class Story extends TestHelper {
 		return actions.remove();
 	}
 
-	public StoryResult call(TestContext cx) {
+	public StoryResult call(LoadTestContext cx) {
 		cx.newStory();
 		StoryResult testResult = new StoryResult(getName());
 		Action previousAction = null, action;
@@ -67,7 +67,7 @@ public abstract class Story extends TestHelper {
 					log.error("Validation failed; content written to {}", fn, e);
 					actionResult.setFail(e.toString());
 					actionResult.setException(e);
-					Util.writeFile(cx.getLogDir(), fn, actionResult.getContent());
+					cx.logFile(fn, actionResult.getContent());
 				}
 				testResult.addActionResult(actionResult);
 				lastActionPassed = actionResult.isPassed();
@@ -95,7 +95,7 @@ public abstract class Story extends TestHelper {
 	/**
 	 * If you want to use any actionResult.content do so here.  (eg to save error pages)
 	 */
-	protected void onTestComplete(TestContext cx) {
+	protected void onTestComplete(LoadTestContext cx) {
 	}
 
 	public String getName() {

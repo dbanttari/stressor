@@ -28,4 +28,8 @@ public class Average {
 		return total / (double)getCount();
 	}
 
+	public double getTotal() {
+		return total;
+	}
+
 }

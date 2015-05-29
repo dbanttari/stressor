@@ -14,7 +14,7 @@ public class RateLimiterTestStory extends Story {
 		addAction(new Action() {
 
 			@Override
-			public ActionResult call(TestContext cx) {
+			public ActionResult call(LoadTestContext cx) {
 				log.debug("Action called!");
 				return null;
 			}

@@ -7,8 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.darylb.stressor.ReferringHttpClient;
-import net.darylb.stressor.TestContext;
-import net.darylb.stressor.Util;
+import net.darylb.stressor.LoadTestContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -25,22 +24,22 @@ public abstract class AbstractHttpAction extends Action {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(AbstractHttpAction.class);
 	
-	LinkedHashMap<String, Cookie> cookies;
+	LinkedHashMap<String, HttpCookie> cookies;
 	
 	protected void parseCookies(HttpResponse response) {
 		if(cookies==null) {
-			cookies = new LinkedHashMap<String, Cookie>();
+			cookies = new LinkedHashMap<String, HttpCookie>();
 		}
 		for(Header header : response.getAllHeaders()) {
 			if(header.getName().equalsIgnoreCase("Set-Cookie")) {
-				Cookie c = new Cookie(header.getValue());
+				HttpCookie c = new HttpCookie(header.getValue());
 				//log.debug("cookie " + c.name.toLowerCase() + ": " + c.value);
 				cookies.put(c.name.toLowerCase(), c);
 			}
 		}
 	}
 	
-	public LinkedHashMap<String, Cookie> getCookies() {
+	public LinkedHashMap<String, HttpCookie> getCookies() {
 		return cookies;
 	}
 	
@@ -49,7 +48,7 @@ public abstract class AbstractHttpAction extends Action {
 	}
 	
 	public String getNewCookieValue(String cookieName, String dfault) {
-		Cookie c = cookies.get(cookieName.toLowerCase());
+		HttpCookie c = cookies.get(cookieName.toLowerCase());
 		return c == null ? dfault : c.value;
 	}
 	
@@ -83,7 +82,7 @@ public abstract class AbstractHttpAction extends Action {
 	    return Arrays.copyOfRange(buf, 0, pos);
 	}
 	
-	HttpClient getHttpClient(TestContext cx) {
+	HttpClient getHttpClient(LoadTestContext cx) {
 		HttpClient ret;
 		if(cx.hasStoryObject(Props.HTTP_CLIENT)) {
 			ret = (HttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
@@ -96,8 +95,8 @@ public abstract class AbstractHttpAction extends Action {
 	}
 
 	private static volatile int responseCount=0;
-	public void logResponse(TestContext cx, String content) {
-		Util.writeFile(cx.getLogDir(), "response-"+Integer.toString(++responseCount)+".html", content);
+	public void logResponse(LoadTestContext cx, String content) {
+		cx.logFile("response-"+Integer.toString(++responseCount)+".html", content);
 	}
 
 }

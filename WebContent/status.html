@@ -1,0 +1,9 @@
+<h1>{{status.name}} Status</h1>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" aria-valuenow="{{status.completionPct | number : 0}}" aria-valuemin="0" aria-valuemax="100" style="width: {{status.completionPct | number : 0}}%;">
+    <span class="sr-only">{{status.completionPct | number : 1}}% Complete</span>
+  </div>
+</div>
+<div>
+<pre>{{status}}</pre>
+</div>

@@ -2,7 +2,7 @@ package net.darylb.stressor;
 
 import java.sql.Connection;
 
-public class MockTestContext extends TestContext {
+public class MockTestContext extends LoadTestContext {
 
 	private static final long serialVersionUID = -1804751449059619804L;
 	private Connection connection;

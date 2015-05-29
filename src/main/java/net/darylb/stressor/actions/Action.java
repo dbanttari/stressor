@@ -3,14 +3,14 @@ package net.darylb.stressor.actions;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.darylb.stressor.TestContext;
-import net.darylb.stressor.TestHelper;
+import net.darylb.stressor.LoadTestContext;
+import net.darylb.stressor.LoadTestHelper;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public abstract class Action extends TestHelper {
+public abstract class Action extends LoadTestHelper {
 
 	private String name;
 	
@@ -23,42 +23,42 @@ public abstract class Action extends TestHelper {
 	 * @param cx
 	 * @return an ActionResult object indicating whether the test succeeded
 	 */
-	public abstract ActionResult call(TestContext cx);
+	public abstract ActionResult call(LoadTestContext cx);
 	
 	/**
 	 * Returns failure reason, or null for pass
 	 * @param content
 	 * @return
 	 */
-	public void validate(TestContext cx, String content) throws Exception {
+	public void validate(LoadTestContext cx, String content) throws Exception {
 	}
 	
 	/**
 	 * Helper method to throw a TestValidationException with the given reason string.
 	 * @param reason The reason this test is invalid
-	 * @throws TestValidationException
+	 * @throws ActionValidationException
 	 */
-	protected static void invalid(String reason) throws TestValidationException {
-		throw new TestValidationException(reason);
+	protected static void invalid(String reason) throws ActionValidationException {
+		throw new ActionValidationException(reason);
 	}
 
 	/**
 	 * Helper method to throw a TestValidationException with the given reason string and 'caused by' exception.
 	 * @param reason The reason this test is invalid
 	 * @param t the exception causing this validation failure
-	 * @throws TestValidationException
+	 * @throws ActionValidationException
 	 */
-	protected static void invalid(String reason, Throwable t) throws TestValidationException {
-		throw new TestValidationException(reason, t);
+	protected static void invalid(String reason, Throwable t) throws ActionValidationException {
+		throw new ActionValidationException(reason, t);
 	}
 
 	/**
 	 * Helper method to throw a TestValidationException with the given 'caused by' exception.
 	 * @param t the exception causing this validation failure
-	 * @throws TestValidationException
+	 * @throws ActionValidationException
 	 */
-	protected static void invalid(Throwable t) throws TestValidationException {
-		throw new TestValidationException(t);
+	protected static void invalid(Throwable t) throws ActionValidationException {
+		throw new ActionValidationException(t);
 	}
 	
 	/**

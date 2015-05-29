@@ -3,34 +3,37 @@ package net.darylb.stressor.actions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 public abstract class RedisAction extends Action {
 
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(RedisAction.class);
+	private static String jedisHost;
 	
-	static JedisPool jedisPool;
+	/**
+	 * Attempts to use JedisPool when using SSH port forwarding failed miserably.
+	 * Instead, we're using a ThreadLocal Jedis to control the number of
+	 * instances/connections created.
+	 */
+	static ThreadLocal<Jedis> jedisPool = new ThreadLocal<Jedis>() {
+		protected Jedis initialValue() {
+			return new Jedis(jedisHost);
+		};
+	};
 	
 	@Override
-	public ActionResult call(TestContext cx) {
-		Jedis jedis;
-		if(jedisPool==null) {
-			log.info("Connecting to Redis host {}", cx.getProperty(Props.JEDIS_HOST));
-			JedisPoolConfig poolConfig = new JedisPoolConfig();
-			poolConfig.setMaxTotal(4+cx.getNumThreads()*2); // maximum active connections
-			poolConfig.setMinIdle(1);
-			poolConfig.setTestOnBorrow(true);
-			jedisPool = new JedisPool(poolConfig, cx.getProperty(Props.JEDIS_HOST), 6379, 10);
-			long startTick = System.currentTimeMillis();
-			jedis = jedisPool.getResource();
-			long dur = System.currentTimeMillis() - startTick;
-			log.info("Initial connection took {}ms", dur);
+	 public ActionResult call(LoadTestContext cx) {
+		RedisAction.jedisHost = cx.getProperty(Props.JEDIS_HOST);
+		Jedis jedis = jedisPool.get();
+		try {
+			jedis.ping();
 		}
-		else {
-			jedis = jedisPool.getResource();
+		catch(Exception e) {
+			jedis = new Jedis(jedisHost);
+			jedis.ping();
+			jedisPool.set(jedis);
 		}
 		ActionResult ret = null;
 		try {
@@ -42,6 +45,6 @@ public abstract class RedisAction extends Action {
 		return ret;
 	}
 
-	public abstract ActionResult call(TestContext cx, Jedis jedis);
+	public abstract ActionResult call(LoadTestContext cx, Jedis jedis);
 
 }

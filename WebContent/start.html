@@ -1,0 +1,58 @@
+<form>
+	<div class="row">
+		<div class="col-md-3">
+			<div class="lead">Test Definitions</div>
+			<div ng-show="testDefinitionsLoading"><img src="images/ajax-loader.gif"/></div>
+			<div class="list-group">
+				<a href="#" onClick="return false;" class="list-group-item"
+						ng-repeat="testDefinition in testDefinitions"
+						ng-click="setTestDefinition(testDefinition.canonicalName)"
+						ng-class="{'active': test.definition=='{{testDefinition.canonicalName}}'}">
+					{{testDefinition.name}}
+				</a>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="lead">Test Type</div>
+			<div class="list-group">
+				<a href="#" onClick="return false;" class="list-group-item" ng-click="test.type='timed'" ng-class="{'active': test.type=='timed'}">Timed</a>
+				<a href="#" onClick="return false;" class="list-group-item" ng-click="test.type='counted'" ng-class="{'active': test.type=='counted'}">Counted</a>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="lead">Test Size</div>
+			<div class="form-group">
+				<label for="testThreads">Threads</label>
+				<input id="testThreads" type="number" ng-model="test.threads">
+			</div>
+			<div class="form-group" ng-show="test.type=='timed'">
+				<label for="testDuration">Duration</label>
+				<input id="testDuration" type="number" class="nn" ng-model="test.dur.hr">h
+				<input type="number" class="nn" ng-model="test.dur.min">m
+			</div>
+			<div class="form-group" ng-show="test.type=='counted'">
+				<label for="testIterations">Iterations</label>
+				<input id="testIterations" type="number" ng-model="test.iterationCount" value="10">
+			</div>
+			<div class="lead">Rate Limit</div>
+			<div class="form-group">
+				<input id="storyLimitCount" type="number" class="nn" ng-model="test.limit.count">
+				<label for="storyLimitCount">stories</label>
+				
+				<label for="storyLimitInterval">per</label>
+				<select id="storyLimitInterval" ng-model="test.limit.interval">
+					<option value="s">sec</option>
+					<option value="m">min</option>
+					<option value="h">hr</option>
+				</select>
+				
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="lead">Launch</div>
+			<div>
+				<button type="button" class="btn btn-primary" ng-click="startTest()">Start Test</button>
+			</div>
+		</div>
+	</div>
+</form>

@@ -2,13 +2,14 @@ package net.darylb.stressor.actions;
 
 import static org.junit.Assert.*;
 import net.darylb.stressor.MockTestContext;
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
 
+@SuppressWarnings("unused")
 public class RedisActionTest {
 
 	public class TestRedisAction extends RedisAction {
@@ -17,7 +18,7 @@ public class RedisActionTest {
 		static final String VALUE = "Hello, Cruel World";		
 		
 		@Override
-		public ActionResult call(TestContext cx, Jedis jedis) {
+		public ActionResult call(LoadTestContext cx, Jedis jedis) {
 			jedis.set(KEY, VALUE);
 			String ret = jedis.get(KEY);
 			assertEquals(VALUE, ret);
@@ -29,11 +30,11 @@ public class RedisActionTest {
 		
 	}
 	
-	@Test @Ignore
+	@Test
 	public void test() {
 		MockTestContext cx = new MockTestContext();
 		// redis must be available at this location:
-		cx.setProperty("jedis.host", "staging-utility-1.aws.invision.works");
+		cx.setProperty("jedis.host", "localhost");
 		new TestRedisAction().call(cx);
 	}
 

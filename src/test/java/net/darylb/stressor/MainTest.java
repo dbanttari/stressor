@@ -10,7 +10,7 @@ public class MainTest {
 
 	@Test
 	public void testGetLoadTest_Invalid() {
-		TestDefinition testRunner = new MockTestDefinition();
+		LoadTestDefinition testRunner = new MockTestDefinition();
 		LinkedList<String> args = new LinkedList<String>();
 		args.add("23");
 		args.add("123z");
@@ -20,7 +20,7 @@ public class MainTest {
 
 	@Test
 	public void testGetLoadTest_Fixed() {
-		TestDefinition testRunner = new MockTestDefinition();
+		LoadTestDefinition testRunner = new MockTestDefinition();
 		LinkedList<String> args = new LinkedList<String>();
 		args.add("23");
 		args.add("123");
@@ -30,7 +30,7 @@ public class MainTest {
 	
 	@Test
 	public void testGetLoadTest_Timed() {
-		TestDefinition testRunner = new MockTestDefinition();
+		LoadTestDefinition testRunner = new MockTestDefinition();
 		LinkedList<String> args = new LinkedList<String>();
 		args.add("23");
 		args.add("123m");

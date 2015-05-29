@@ -1,6 +1,6 @@
 package net.darylb.stressor.actions;
 
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 
 public class HttpGetActionImpl extends HttpGetAction {
 
@@ -17,7 +17,7 @@ public class HttpGetActionImpl extends HttpGetAction {
 	}
 
 	@Override
-	public void validate(TestContext cx, String content) throws TestValidationException {
+	public void validate(LoadTestContext cx, String content) throws ActionValidationException {
 		if(expected != null) {
 			if(content.indexOf(expected) == -1) {
 				invalid("'" + expected + "' not found in response");
@@ -26,7 +26,7 @@ public class HttpGetActionImpl extends HttpGetAction {
 	}
 
 	@Override
-	public String getUri(TestContext cx) {
+	public String getUri(LoadTestContext cx) {
 		return url;
 	}
 }

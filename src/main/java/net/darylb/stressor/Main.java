@@ -25,13 +25,13 @@ public class Main {
 			}
 			Properties props = new Properties();
 			Util.loadProperties(props);
-			TestDefinition testRunner;
+			LoadTestDefinition testRunner;
 			try {
 				if(props.containsKey("stressor.package")) {
-					testRunner = (TestDefinition)Class.forName(props.getProperty(Props.STRESSOR_PACKAGE) + "." + argsList.remove()).newInstance();
+					testRunner = (LoadTestDefinition)Class.forName(props.getProperty(Props.STRESSOR_PACKAGE) + "." + argsList.remove()).newInstance();
 				}
 				else { 
-					testRunner = (TestDefinition)Class.forName(argsList.remove()).newInstance();
+					testRunner = (LoadTestDefinition)Class.forName(argsList.remove()).newInstance();
 				}
 			}
 			catch(Exception e) {
@@ -47,14 +47,14 @@ public class Main {
 				return;
 			}
 			else {
-				TestResults results = loadTest.run();
+				LoadTestResults results = loadTest.run();
 				System.out.println(results.toString());
 			}
 	
 		}
 	}
 
-	static LoadTest getTest(TestDefinition testRunner, LinkedList<String> args) {
+	static LoadTest getTest(LoadTestDefinition testRunner, LinkedList<String> args) {
 		int threads;
 		try {
 			threads = Integer.parseInt(args.remove());
@@ -70,14 +70,18 @@ public class Main {
 		Pattern p = Pattern.compile("^([0-9]+)$");
 		Matcher match = p.matcher(testDuration);
 		if(match.matches()) {
-			return new FixedLoadTest(testRunner, threads, Integer.parseInt(match.group()));
+			LoadTestContext cx = testRunner.getLoadTestContext();
+			cx.setRateLimiter(testRunner.getRateLimiter());
+			return new FixedLoadTest(cx, testRunner.getStoryFactory(cx), threads, Integer.parseInt(match.group()));
 		}
 		
 		// run for a specified duration
 		p = Pattern.compile("^([0-9]+)([dhms])$");
 		match = p.matcher(testDuration);
 		if(match.matches()) {
-			return new TimedLoadTest(testRunner, threads, testDuration);
+			LoadTestContext cx = testRunner.getLoadTestContext();
+			cx.setRateLimiter(testRunner.getRateLimiter());
+			return new TimedLoadTest(cx, testRunner.getStoryFactory(cx), threads, testDuration);
 		}
 		
 		return null;

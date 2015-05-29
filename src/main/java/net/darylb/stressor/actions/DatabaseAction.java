@@ -3,13 +3,13 @@ package net.darylb.stressor.actions;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 
 public abstract class DatabaseAction extends Action {
 
 	
 	@Override
-	public ActionResult call(TestContext cx) {
+	public ActionResult call(LoadTestContext cx) {
 		ActionResult ret = null;
 		try {
 			Connection c = cx.getStoryConnection();
@@ -22,6 +22,6 @@ public abstract class DatabaseAction extends Action {
 		return ret;
 	}
 
-	public abstract ActionResult call(TestContext cx, Connection connection) throws SQLException;
+	public abstract ActionResult call(LoadTestContext cx, Connection connection) throws SQLException;
 
 }

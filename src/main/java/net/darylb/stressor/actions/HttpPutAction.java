@@ -3,7 +3,7 @@ package net.darylb.stressor.actions;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,7 +17,7 @@ public abstract class HttpPutAction extends AbstractHttpAction {
 	private static Logger log = LoggerFactory.getLogger(HttpPutAction.class);
 	
 	@Override
-	public ActionResult call(TestContext cx) {
+	public ActionResult call(LoadTestContext cx) {
 		String uriString = getUri(cx);
 		try {
 			URI uri = new URI(uriString);
@@ -32,7 +32,7 @@ public abstract class HttpPutAction extends AbstractHttpAction {
 		}
 	}
 
-	protected ActionResult doHttpRequest(TestContext cx, URI uri) {
+	protected ActionResult doHttpRequest(LoadTestContext cx, URI uri) {
 		ActionResult ret = new ActionResult(this.getClass().getName());
 		HttpPut httpPut = new HttpPut(uri);
 		httpPut.setEntity(getHttpEntity());
@@ -44,7 +44,7 @@ public abstract class HttpPutAction extends AbstractHttpAction {
 			ret.setStatus(status);
 			if(status != 200 && status != 201) {
 				String reason = "Response code " + status;
-				log.warn("Test failure: " + reason);
+				log.warn("Upload to {} failed: {}", uri, reason);
 				ret.setFail(reason);
 			}
 			HttpEntity entity = response.getEntity();
@@ -54,7 +54,7 @@ public abstract class HttpPutAction extends AbstractHttpAction {
 			}
 		}
 		catch (Throwable t) {
-			log.warn("Request Failed:", t);
+			log.warn("Upload to {} failed:", uri, t);
 			ret.setFail(t.getMessage());
 			ret.setException(t);
 		}
@@ -63,7 +63,7 @@ public abstract class HttpPutAction extends AbstractHttpAction {
 
 	public abstract HttpEntity getHttpEntity();
 
-	public abstract String getUri(TestContext cx);
+	public abstract String getUri(LoadTestContext cx);
 
 	protected HttpResponse getResponse() {
 		return response;

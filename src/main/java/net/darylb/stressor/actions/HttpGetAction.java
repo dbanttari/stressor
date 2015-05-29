@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import net.darylb.stressor.TestContext;
+import net.darylb.stressor.LoadTestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,7 +23,7 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 	private String referer;
 	
 	@Override
-	public ActionResult call(TestContext cx) {
+	public ActionResult call(LoadTestContext cx) {
 		ActionResult actionResult = new ActionResult(this.getName());
 		try {
 			actionResult = doHttpRequest(cx);
@@ -37,7 +37,7 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 		return actionResult;
 	}
 	
-	protected ActionResult doHttpRequest(TestContext cx) throws ClientProtocolException, IOException {
+	protected ActionResult doHttpRequest(LoadTestContext cx) throws ClientProtocolException, IOException {
 		ActionResult ret = new ActionResult(this.getName());
 		String uriString = getUri(cx);
 		URI uri;
@@ -79,7 +79,7 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 		return ret;
 	}
 
-	public abstract String getUri(TestContext cx);
+	public abstract String getUri(LoadTestContext cx);
 	
 	protected HttpResponse getResponse() {
 		return response;

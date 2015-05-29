@@ -1,7 +1,6 @@
 package net.darylb.stressor;
 
 import java.beans.PropertyVetoException;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -28,12 +27,12 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @author daryl
  *
  */
-public class TestContext extends Properties {
+public class LoadTestContext extends Properties {
 
-	private static final Logger log = LoggerFactory.getLogger(TestContext.class);
+	private static final Logger log = LoggerFactory.getLogger(LoadTestContext.class);
 	
 	private static final long serialVersionUID = -1605284270262743221L;
-	private final File logDir;
+	private FileLogger fileLogger;
 	private final String name;
 	private ThreadLocal<HashMap<String, Object>> storyProperties = new ThreadLocal<HashMap<String, Object>>() {
 		@Override
@@ -44,9 +43,13 @@ public class TestContext extends Properties {
 
 	ComboPooledDataSource pool;
 	
-	public TestContext(String name, String logDir) {
+	public LoadTestContext(String name, String logDir) {
+		this(name);
+		this.fileLogger = new FilesystemFileLogger(logDir);
+		
+	}
+	public LoadTestContext(String name) {
 		this.name = name;
-		this.logDir = new File(logDir);
 		Util.loadProperties(this);
 	}
 	
@@ -56,12 +59,6 @@ public class TestContext extends Properties {
 	}
 	public void setNumThreads(int numThreads) {
 		this.numThreads = numThreads;
-	}
-
-	
-	
-	public File getLogDir() {
-		return logDir;
 	}
 
 	public String getName() {
@@ -234,7 +231,7 @@ public class TestContext extends Properties {
 	
 	/****  Rate Limiting ****/
 	private RateLimiter rateLimiter;
-	protected void setRateLimiter(RateLimiter rateLimiter) {
+	public void setRateLimiter(RateLimiter rateLimiter) {
 		if(rateLimiter != null) {
 			log.info("Rate limit set via {}", rateLimiter.getClass().getSimpleName());
 			this.rateLimiter = rateLimiter;
@@ -245,5 +242,18 @@ public class TestContext extends Properties {
 			rateLimiter.limitRate();
 		}
 	}
+	
+	/**** attaching files to load test ****/
+	public void logFile(String fileName, String content) {
+		fileLogger.logFile(fileName, content);
+	}
+	public void setFileLogger(FileLogger fileLogger) {
+		this.fileLogger = fileLogger;
+	}
+	public FileLogger getFileLogger() {
+		return this.fileLogger;
+	}
+	
+	
 
 }

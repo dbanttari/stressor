@@ -5,13 +5,29 @@ public class RateLimiterImpl implements RateLimiter, Runnable {
 	public enum Interval {
 		SECOND(1000L),
 		MINUTE(1000L * 60L),
-		HOUR(1000L * 60L * 60L);
+		HOUR(1000L * 60L * 60L),
+		DAY(1000L * 60L * 60L * 24L);
 		long ms;
 		Interval(long ms) {
 			this.ms = ms;
 		}
 		public long getIntervalMs() {
 			return ms;
+		}
+		public static Interval getInterval(String s) {
+			if(s.equalsIgnoreCase("s")) {
+				return SECOND;
+			}
+			else if (s.equalsIgnoreCase("m")) {
+				return MINUTE;
+			}
+			else if (s.equalsIgnoreCase("h")) {
+				return HOUR;
+			}
+			else if (s.equalsIgnoreCase("d")) {
+				return DAY;
+			}
+			return null;
 		}
 	}
 	

@@ -8,13 +8,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Properties;
+import java.util.concurrent.ThreadLocalRandom;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Util {
 	
 	private static Logger log = LoggerFactory.getLogger(Util.class);
+	
+	public static String JSONP_TOKEN = ")]}',\n";
 
 	public static void writeFile(File path, String name, String content) {
 		File f = new File(path, name);
@@ -64,6 +68,29 @@ public class Util {
 		else {
 			log.info("stressor.properties not found in working directory.");
 		}
+	}
+
+	public static long parseDuration(String duration) {
+		long num = Long.parseLong(duration.substring(0, duration.length()-1));
+		char interval = duration.charAt(duration.length()-1);
+		switch(interval) {
+		case 's':
+			return num * 1000L;
+		case 'm':
+			return num * 60L * 1000L;
+		case 'h':
+			return num * 60L * 60L * 1000L;
+		case 'd':
+			return num * 24L * 60L * 60L * 1000L;
+		}
+		throw new IllegalArgumentException("Invalid duration string.  Should be nnn[s|m|h|d]");
+	}
+
+
+	public static String createUUID() {
+		byte[] bytes = new byte[12];
+		ThreadLocalRandom.current().nextBytes(bytes);
+		return new Base64().encodeAsString(bytes);
 	}
 	
 }

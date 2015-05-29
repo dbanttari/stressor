@@ -1,6 +1,6 @@
 package net.darylb.stressor.actions;
 
-public class Cookie {
+public class HttpCookie {
 
 	String name;
 	String value;
@@ -8,7 +8,7 @@ public class Cookie {
 	String expires;
 	String path;
 	
-	public Cookie(String rawCookie) {
+	public HttpCookie(String rawCookie) {
 		String[] parts = rawCookie.split(";");
 		boolean isFirst = true;
 		for(String part : parts) {

@@ -3,28 +3,21 @@ package net.darylb.stressor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestThread implements Runnable {
+public class LoadTestThread implements Runnable {
 	
-	private static Logger log = LoggerFactory.getLogger(TestThread.class);
+	private static Logger log = LoggerFactory.getLogger(LoadTestThread.class);
 
-	private TestContext cx;
+	private LoadTestContext cx;
 	private StoryFactory storyFactory;
-	private TestResults testResults;
+	private LoadTestResults testResults;
 	private Thread thread;
 	private boolean isRunning = true;
 	private static int num = 1;
 
-	private int maxIterations;
-
-	public TestThread(TestContext cx, StoryFactory testFactory, TestResults testResults) {
-		this(cx, testFactory, testResults, -1);
-	}
-	
-	public TestThread(TestContext cx, StoryFactory testFactory, TestResults testResults, int maxIterations) {
+	public LoadTestThread(LoadTestContext cx, StoryFactory testFactory, LoadTestResults testResults) {
 		this.cx = cx;
 		this.storyFactory = testFactory;
 		this.testResults = testResults;
-		this.maxIterations = maxIterations;
 		this.thread = new Thread(this);
 		this.thread.setName(testFactory.getName() + " TestThread " + Integer.toString(num++));
 		this.thread.setDaemon(true);
@@ -63,15 +56,12 @@ public class TestThread implements Runnable {
 				StoryResult testResult = story.call(cx);
 				testResults.addResult(testResult);
 			}
-			catch(TestOverException t) {
-				log.info("StoryFactory ran out of stories.");
+			catch(LoadTestOverException t) {
 				isRunning = false;
 			}
 			catch(Throwable t) {
 				log.error("Error in {}", storyFactoryName, t);
 			}
-			// don't override isRunning if shutdown() or TestOverException set it false
-			isRunning = isRunning && (maxIterations == -1 || --maxIterations > 0);
 		}
 		log.info("Thread {} complete.", thread.getName());
 	}

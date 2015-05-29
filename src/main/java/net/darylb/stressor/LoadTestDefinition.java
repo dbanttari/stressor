@@ -5,31 +5,32 @@ import org.slf4j.LoggerFactory;
 
 /**
  * When running a load test, this is the definition of what a load test
- * should do.  In most cases, simply implementing {@link #getStoryFactory(TestContext)}
- * will suffice, but overriding {@link #getTestContext()} can be useful if
+ * should do.  In most cases, simply implementing {@link #getStoryFactory(LoadTestContext)}
+ * will suffice, but overriding {@link #getLoadTestContext()} can be useful if
  * parameters are retrieved from other than stressor.properties.
  * @author daryl
  *
  */
-public abstract class TestDefinition {
+public abstract class LoadTestDefinition {
 	
-	public static Logger log = LoggerFactory.getLogger(TestDefinition.class);
+	@SuppressWarnings("unused")
+	private static Logger log = LoggerFactory.getLogger(LoadTestDefinition.class);
 	private String name ;
 
-	public TestDefinition() {
+	public LoadTestDefinition() {
 		this.name = this.getClass().getSimpleName();
 	}
 	
-	public TestDefinition(String name) {
+	public LoadTestDefinition(String name) {
 		this.name = name;
 	}
 	
 	/**
-	 * Return a {@link StoryFactory} for this test.
+	 * Return a {@link StoryFactoryImpl} for this test.
 	 * @param cx
-	 * @return the {@link StoryFactory} implementation for this test
+	 * @return the {@link StoryFactoryImpl} implementation for this test
 	 */
-	public abstract StoryFactory getStoryFactory(TestContext cx);
+	public abstract StoryFactory getStoryFactory(LoadTestContext cx);
 	
 	/**
 	 * Returns a configured TestContext object (which, by default, will load global
@@ -38,8 +39,8 @@ public abstract class TestDefinition {
 	 * not suffice.
 	 * @return a configured TestContext
 	 */
-	public TestContext getTestContext() {
-		return new TestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
+	public LoadTestContext getLoadTestContext() {
+		return new LoadTestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
 	}
 
 	/**

@@ -12,10 +12,10 @@ import net.darylb.stressor.actions.ActionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestHelper {
+public class LoadTestHelper {
 	
 	@SuppressWarnings("unused")
-	private static Logger log = LoggerFactory.getLogger(TestHelper.class);
+	private static Logger log = LoggerFactory.getLogger(LoadTestHelper.class);
 	
 	private Connection c;
 	
@@ -23,7 +23,7 @@ public class TestHelper {
 
 	private Statement s;
 
-	protected void closeResultSet(TestContext cx) {
+	protected void closeResultSet(LoadTestContext cx) {
 		try {
 			if(rs != null && !rs.isClosed()) {
 				rs.close();
@@ -58,7 +58,7 @@ public class TestHelper {
 		}
 	}
 	
-	protected ResultSet preparedQuery(TestContext cx, String sql, Object... params) throws SQLException {
+	protected ResultSet preparedQuery(LoadTestContext cx, String sql, Object... params) throws SQLException {
 		closeResultSet(cx);
 		PreparedStatement ps = c.prepareStatement(sql);
 		s = ps;
@@ -68,7 +68,7 @@ public class TestHelper {
 		return ps.executeQuery();
 	}
 
-	protected int preparedUpdate(TestContext cx, String sql, Object... params) throws SQLException {
+	protected int preparedUpdate(LoadTestContext cx, String sql, Object... params) throws SQLException {
 		closeResultSet(cx);
 		PreparedStatement ps = c.prepareStatement(sql);
 		s = ps;
@@ -79,14 +79,14 @@ public class TestHelper {
 		return ret;
 	}
 	
-	protected ResultSet query(TestContext cx, String sql) throws SQLException {
+	protected ResultSet query(LoadTestContext cx, String sql) throws SQLException {
 		closeResultSet(cx);
 		s = c.createStatement();
 		rs =  s.executeQuery(sql);
 		return rs;
 	}
 	
-	protected int update(TestContext cx, String sql) throws SQLException {
+	protected int update(LoadTestContext cx, String sql) throws SQLException {
 		closeResultSet(cx);
 		PreparedStatement ps = c.prepareStatement(sql);
 		s = ps;
@@ -94,7 +94,7 @@ public class TestHelper {
 		return ret;
 	}
 	
-	public ActionResult runAction(TestContext cx, Action action) {
+	public ActionResult runAction(LoadTestContext cx, Action action) {
 		ActionResult ret = action.call(cx);
 		if(ret != null) {
 			try {

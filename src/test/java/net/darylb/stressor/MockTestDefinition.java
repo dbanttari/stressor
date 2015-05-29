@@ -1,10 +1,10 @@
 package net.darylb.stressor;
 
-public class MockTestDefinition extends TestDefinition {
+public class MockTestDefinition extends LoadTestDefinition {
 
 	@Override
-	public StoryFactory getStoryFactory(TestContext cx) {
-		return null;
+	public StoryFactory getStoryFactory(LoadTestContext cx) {
+		return new MockStoryFactory(cx);
 	}
 
 }

@@ -17,9 +17,10 @@ public class ActionResult {
 		this.startTick = System.currentTimeMillis();
 	}
 	
-	public void setStatus(int statusCode) {
+	public ActionResult setStatus(int statusCode) {
 		setDuration();
 		this.statusCode = statusCode;
+		return this;
 	}
 
 	public int getStatusCode() {
@@ -30,40 +31,44 @@ public class ActionResult {
 		return content;
 	}
 
-	public void setContent(String content) {
+	public ActionResult setContent(String content) {
 		setDuration();
 		this.content = content;
+		return this;
 	}
 
 	public Throwable getException() {
 		return exception;
 	}
 
-	public void setException(Throwable exception) {
+	public ActionResult setException(Throwable exception) {
 		setDuration();
 		this.exception = exception;
+		return this;
 	}
 
 	public boolean isPassed() {
 		return passed;
 	}
 
-	public void setFail(String reason) {
+	public ActionResult setFail(String reason) {
 		setDuration();
 		this.setReason(reason);
 		this.passed = false;
+		return this;
 	}
 
 	public String getReason() {
 		return reason;
 	}
 
-	public void setReason(String reason) {
+	public ActionResult setReason(String reason) {
 		setDuration();
 		this.reason = reason;
+		return this;
 	}
 
-	public void setValid(String reason) {
+	public ActionResult setValid(String reason) {
 		setDuration();
 		if(reason == null) {
 			passed = true;
@@ -72,15 +77,18 @@ public class ActionResult {
 			System.out.println("Test failed: " + reason);
 			setFail(reason);
 		}
+		return this;
 	}
 
-	private void setDuration() {
+	private ActionResult setDuration() {
 		this.requestDurationMs = System.currentTimeMillis() - startTick;
+		return this;
 	}
 
-	public void setRequestCount(int hitCount) {
+	public ActionResult setRequestCount(int hitCount) {
 		setDuration();
 		this.requestCount = hitCount;
+		return this;
 	}
 	
 	public int getRequestCount() {
@@ -99,8 +107,9 @@ public class ActionResult {
 		return name;
 	}
 
-	public void setName(String name) {
+	public ActionResult setName(String name) {
 		this.name = name;
+		return this;
 	}
 	
 	
