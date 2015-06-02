@@ -112,4 +112,8 @@ public abstract class LoadTest {
 		return status;
 	}
 
+	public LoadTestContext getLoadTestContext() {
+		return cx;
+	}
+
 }

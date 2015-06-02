@@ -1,6 +1,6 @@
 package net.darylb.stressor.ui;
 
-import net.darylb.stressor.RateLimiterImpl;
+import net.darylb.stressor.Interval;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -33,10 +33,10 @@ public class LoadTestParams {
 			// timed load test
 			JSONObject dur = (JSONObject)obj.get("dur");
 			if(dur.containsKey("hr")) {
-				ret.durationMs += Integer.parseInt(dur.get("hr").toString()) * RateLimiterImpl.Interval.HOUR.getIntervalMs();
+				ret.durationMs += Integer.parseInt(dur.get("hr").toString()) * Interval.HOUR.getIntervalMs();
 			}
 			if(dur.containsKey("min")) {
-				ret.durationMs += Integer.parseInt(dur.get("min").toString()) * RateLimiterImpl.Interval.MINUTE.getIntervalMs();
+				ret.durationMs += Integer.parseInt(dur.get("min").toString()) * Interval.MINUTE.getIntervalMs();
 			}
 		}
 		if(obj.containsKey("limit")) {

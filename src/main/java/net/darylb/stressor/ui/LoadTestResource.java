@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import net.darylb.stressor.FixedLoadTest;
 import net.darylb.stressor.InMemoryFileLogger;
+import net.darylb.stressor.Interval;
 import net.darylb.stressor.LoadTest;
 import net.darylb.stressor.LoadTestContext;
 import net.darylb.stressor.LoadTestDefinition;
@@ -109,7 +110,7 @@ public class LoadTestResource {
 		LoadTestContext cx = def.getLoadTestContext();
 		cx.setFileLogger(new InMemoryFileLogger());
 		if(params.limitInterval != null) {
-			RateLimiter rateLimiter = new RateLimiterImpl(params.limitCount, RateLimiterImpl.Interval.getInterval(params.limitInterval));
+			RateLimiter rateLimiter = new RateLimiterImpl(params.limitCount, Interval.getInterval(params.limitInterval));
 			cx.setRateLimiter(rateLimiter);
 		}
 		LoadTest ret;

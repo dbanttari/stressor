@@ -25,7 +25,7 @@ git checkout https://github.com/dbanttari/stressor.git
 Implementation
 --------------
 To build a stressor test, you will need to create a minimum of four classes, and usually a stressor.properties file.
-- A TestDefinition to return a StoryFactory
+- A LoadTestDefnition to return a StoryFactory
 - A StoryFactory to configure Stories
 - A Story will return one or more Actions
 - An Action will do some small task (eg, load a page)
@@ -39,3 +39,9 @@ Helpers exist for Actions:
   - see org.apache.http.entity.FileEntity.FileEntity(File)
 - A DatabaseAction will pass in a shiny new Connection for you to (ab)use
 
+Running a Test
+- Create a stressor.properties file with the properties for the test
+ - jdbc.driver, jdbc.url, jdbc.username, and jdbc.password can be used to inform StoryFactory.
+ - stressor.package can be used to set the package your load tests (LoadTestDefnitions) reside in.
+- Run `java -jar stressor*.jar [options] LoadTestDefinitionClassName`
+- (Use `java -jar stressor*.jar --help` for help with options)

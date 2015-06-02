@@ -32,6 +32,11 @@ public class FixedLoadTestStoryFactory implements StoryFactory {
 	public Story getStory() throws Exception {
 		return storyFactory.getStory();
 	}
+	
+	@Override
+	public Object[] getNextRow() {
+		return storyFactory.getNextRow();
+	}
 
 	@Override
 	public void useQuery(String sql, boolean isRepeatable) {

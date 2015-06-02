@@ -17,7 +17,7 @@ public class TimedLoadTestDefinition extends LoadTestDefinition {
 	
 	@Override
 	public RateLimiterImpl getRateLimiter() {
-		return new RateLimiterImpl(5, RateLimiterImpl.Interval.SECOND);
+		return new RateLimiterImpl(5, Interval.SECOND);
 	}
 	
 	@Test

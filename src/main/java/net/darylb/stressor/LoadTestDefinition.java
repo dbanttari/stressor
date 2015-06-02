@@ -49,7 +49,7 @@ public abstract class LoadTestDefinition {
 	 * @return a RateLimiter configured to your needs
 	 * @see #RateLimiterImpl
 	 */
-	public RateLimiterImpl getRateLimiter() {
+	public RateLimiter getRateLimiter() {
 		// by default, use no rate limit. 
 		return null;
 	}

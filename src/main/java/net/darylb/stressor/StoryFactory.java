@@ -10,7 +10,9 @@ public interface StoryFactory {
 	 * @param sql The query to iterate over.
 	 * @see #getNextRow()
 	 */
-	public abstract void useQuery(String sql, boolean isRepeatable);
+	void useQuery(String sql, boolean isRepeatable);
+
+	Object[] getNextRow();
 
 	/**
 	 * Implementors are expected to return a new configured Story each time this is called.
@@ -19,12 +21,12 @@ public interface StoryFactory {
 	 * @throws Exception
 	 * @see Story
 	 */
-	public abstract Story getStory() throws Exception;
+	Story getStory() throws Exception;
 
-	public abstract String getName();
+	String getName();
+	
+	Story getRateLimitedStory() throws Exception;
 
-	public abstract Story getRateLimitedStory() throws Exception;
-
-	public abstract void shutdown();
+	void shutdown();
 
 }

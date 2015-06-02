@@ -52,10 +52,10 @@ public abstract class StoryFactoryImpl extends LoadTestHelper implements StoryFa
 		}
 	}
 	
-	protected Object[] getNextRow() {
+	public Object[] getNextRow() {
 		Object[] ret = resultSetQueue.getNextRow();
 		if(ret==null) {
-			throw new LoadTestOverException();
+			throw new LoadTestCompleteException();
 		}
 		return ret;
 	}

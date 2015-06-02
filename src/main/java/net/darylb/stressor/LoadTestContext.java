@@ -237,6 +237,9 @@ public class LoadTestContext extends Properties {
 			this.rateLimiter = rateLimiter;
 		}
 	}
+	public RateLimiter getRateLimiter() {
+		return rateLimiter;
+	}
 	public void limitRate() {
 		if(rateLimiter != null) {
 			rateLimiter.limitRate();
@@ -253,7 +256,5 @@ public class LoadTestContext extends Properties {
 	public FileLogger getFileLogger() {
 		return this.fileLogger;
 	}
-	
-	
 
 }

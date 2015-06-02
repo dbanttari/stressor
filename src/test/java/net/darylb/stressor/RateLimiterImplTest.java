@@ -14,7 +14,7 @@ public class RateLimiterImplTest {
 	
 	@Test
 	public void testSingleThread() {
-		RateLimiter test = new RateLimiterImpl(20, RateLimiterImpl.Interval.SECOND);
+		RateLimiter test = new RateLimiterImpl(20, Interval.SECOND);
 		long startTick = System.currentTimeMillis();
 		for(int i=0; i < 21; ++i) {
 			test.limitRate();
@@ -28,7 +28,7 @@ public class RateLimiterImplTest {
 
 	@Test
 	public void testMultiThread() {
-		RateLimiter test = new RateLimiterImpl(20, RateLimiterImpl.Interval.SECOND);
+		RateLimiter test = new RateLimiterImpl(20, Interval.SECOND);
 		long startTick = System.currentTimeMillis();
 		LinkedList<TestThread> testThreads = new LinkedList<TestThread>();
 		for(int i=0; i < 21; ++i) {

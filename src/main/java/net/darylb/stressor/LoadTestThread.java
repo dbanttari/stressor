@@ -56,7 +56,7 @@ public class LoadTestThread implements Runnable {
 				StoryResult testResult = story.call(cx);
 				testResults.addResult(testResult);
 			}
-			catch(LoadTestOverException t) {
+			catch(LoadTestCompleteException t) {
 				isRunning = false;
 			}
 			catch(Throwable t) {

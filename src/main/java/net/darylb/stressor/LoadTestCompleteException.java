@@ -1,6 +1,6 @@
 package net.darylb.stressor;
 
-public class LoadTestOverException extends RuntimeException {
+public class LoadTestCompleteException extends RuntimeException {
 
 	/**
 	 * 
