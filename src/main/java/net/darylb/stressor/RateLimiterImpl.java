@@ -51,8 +51,10 @@ public class RateLimiterImpl implements RateLimiter, Runnable {
 		nextWakeupTick = System.currentTimeMillis() + minTimeMs;
 		while(true) {
 			try {
-				// we have about 5ms overhead in the loop
-				Thread.sleep(nextWakeupTick - System.currentTimeMillis());
+				long pause = nextWakeupTick - System.currentTimeMillis();
+				if(pause > 0) {
+					Thread.sleep(pause);
+				}
 			}
 			catch (InterruptedException e) {
 				Thread.interrupted();

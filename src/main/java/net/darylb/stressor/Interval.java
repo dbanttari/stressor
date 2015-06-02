@@ -28,6 +28,8 @@ public enum Interval {
 		else if (s == 'd') {
 			return DAY;
 		}
-		return null;
+		else {
+			throw new IllegalArgumentException("Invalid time interval. Must be one of: [s,m,h,d].");
+		}
 	}
 }

@@ -41,7 +41,8 @@ Helpers exist for Actions:
 
 Running a Test
 - Create a stressor.properties file with the properties for the test
- - jdbc.driver, jdbc.url, jdbc.username, and jdbc.password can be used to inform StoryFactory.
+ - jdbc.driver, jdbc.url, jdbc.username, and jdbc.password can be used to inform StoryFactory.useQuery()/getNextRow().
  - stressor.package can be used to set the package your load tests (LoadTestDefnitions) reside in.
 - Run `java -jar stressor*.jar [options] LoadTestDefinitionClassName`
+- You must specify either the `-count` or the `-duration` option.  If both are specified, only the `-count` option will be obeyed.
 - (Use `java -jar stressor*.jar --help` for help with options)

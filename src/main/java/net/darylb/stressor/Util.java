@@ -72,20 +72,9 @@ public class Util {
 
 	public static long parseDuration(String duration) {
 		long num = Long.parseLong(duration.substring(0, duration.length()-1));
-		char interval = duration.charAt(duration.length()-1);
-		switch(interval) {
-		case 's':
-			return num * 1000L;
-		case 'm':
-			return num * 60L * 1000L;
-		case 'h':
-			return num * 60L * 60L * 1000L;
-		case 'd':
-			return num * 24L * 60L * 60L * 1000L;
-		}
-		throw new IllegalArgumentException("Invalid duration string.  Should be nnn[s|m|h|d]");
+		Interval interval = Interval.getInterval(duration.charAt(duration.length()-1));
+		return num * interval.getIntervalMs();
 	}
-
 
 	public static String createUUID() {
 		byte[] bytes = new byte[12];
