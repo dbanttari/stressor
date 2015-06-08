@@ -96,7 +96,8 @@ public class LoadTestContext extends Properties {
 	
 	/**
 	 * Retrieves a Property for the current test story, which is presumed to have been set by
-	 * a previous Action in the current Story.  Will throw a RuntimeException if the property
+	 * a previous Action in the current Story.  If that's not found, this will look for a global
+	 * property with the same name.  Will throw a RuntimeException if the property
 	 * was not already set (as opposed to the default Properties behavior of returning null)
 	 * @param key The name of the property to retrieve
 	 * @see #setStoryProperty(String,String)
@@ -104,7 +105,11 @@ public class LoadTestContext extends Properties {
 	public String getStoryProperty(String key) {
 		String ret = (String)storyProperties.get().get(key);
 		if(ret==null) {
-			throw new RuntimeException("Missing test property: " + key);
+			// if we can't find the property in StoryProperties, try global properties
+			ret = getProperty(key);
+			if(ret==null) {
+				throw new RuntimeException("Missing test property: " + key);
+			}
 		}
 		return ret;
 	}
@@ -121,7 +126,8 @@ public class LoadTestContext extends Properties {
 	
 	/**
 	 * Retrieves an Object for the current test story, which is presumed to have been set by
-	 * a previous Action in the current Story.  Will throw a RuntimeException if the object
+	 * a previous Action in the current Story.  If that's not found, this will look for a global
+	 * property with the same name.  Will throw a RuntimeException if the object
 	 * was not already set (as opposed to the default Map behavior of returning null)
 	 * @param key The name of the object to retrieve
 	 * @see #setStoryObject(String,Object)
@@ -129,7 +135,10 @@ public class LoadTestContext extends Properties {
 	public Object getStoryObject(String key) {
 		Object ret = storyProperties.get().get(key);
 		if(ret==null) {
-			throw new RuntimeException("Missing test object: " + key);
+			ret = this.get(key);
+			if(ret==null) {
+				throw new RuntimeException("Missing test object: " + key);
+			}
 		}		
 		return ret;
 	}
@@ -156,7 +165,7 @@ public class LoadTestContext extends Properties {
 	 * @return
 	 */
 	public boolean hasStoryObject(String key) {
-		return storyProperties.get().containsKey(key);
+		return storyProperties.get().containsKey(key) || this.containsKey(key);
 	}
 
 	/*****   Database Connection Management *****/

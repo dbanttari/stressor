@@ -2,6 +2,8 @@ package net.darylb.stressor.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,6 +43,16 @@ public abstract class AbstractHttpAction extends Action {
 	
 	public LinkedHashMap<String, HttpCookie> getCookies() {
 		return cookies;
+	}
+
+	public void addCookie(String name, String value) {
+		try {
+			addHeader("Set-Cookie", name + "=" + URLEncoder.encode(value, "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e) {
+			// will never happen
+			e.printStackTrace();
+		}
 	}
 	
 	public String getNewCookieValue(String cookieName) {
