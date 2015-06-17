@@ -44,6 +44,7 @@ public class ActionResult {
 	public ActionResult setException(Throwable exception) {
 		setDuration();
 		this.exception = exception;
+		this.passed = false;
 		return this;
 	}
 

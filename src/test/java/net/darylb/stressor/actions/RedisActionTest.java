@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
 
-@SuppressWarnings("unused")
 public class RedisActionTest {
 
 	public class TestRedisAction extends RedisAction {
@@ -30,7 +29,7 @@ public class RedisActionTest {
 		
 	}
 	
-	@Test
+	@Test @Ignore
 	public void test() {
 		MockTestContext cx = new MockTestContext();
 		// redis must be available at this location:

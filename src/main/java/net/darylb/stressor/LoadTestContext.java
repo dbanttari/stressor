@@ -167,6 +167,15 @@ public class LoadTestContext extends Properties {
 	public boolean hasStoryObject(String key) {
 		return storyProperties.get().containsKey(key) || this.containsKey(key);
 	}
+	/**
+	 * determine if a given Story property/object exists
+	 * @param key
+	 * @return
+	 */
+	public boolean hasStoryProperty(String key) {
+		return storyProperties.get().containsKey(key) || this.containsKey(key);
+	}
+
 
 	/*****   Database Connection Management *****/
 	
