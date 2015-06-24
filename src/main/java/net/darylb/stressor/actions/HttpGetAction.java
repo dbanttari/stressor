@@ -9,8 +9,10 @@ import net.darylb.stressor.LoadTestContext;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +53,19 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 		if(referer!=null) {
 			httpget.setHeader("Referer", referer);
 		}
-		HttpClient httpClient = super.getHttpClient(cx);
-		log.debug("Getting {}", uriString);
-		response = httpClient.execute(httpget);
+		HttpClient httpClient = this.getHttpClient(cx);
+		CredentialsProvider credentialsProvider = this.getCredentialsProvider(cx);
+
+		if(credentialsProvider==null) {
+			log.debug("Getting {}", uriString);
+			response = httpClient.execute(httpget);
+		}
+		else {
+			HttpClientContext context = HttpClientContext.create();
+			context.setCredentialsProvider(credentialsProvider);
+			log.debug("Getting {} with http auth", uriString);
+			response = httpClient.execute(httpget, context);
+		}
 		log.debug("Get from {} complete", uriString);
 		int requestCount = 1;
 		while( (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302) && requestCount++ < MAX_REDIRECTS ) {

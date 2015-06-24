@@ -14,6 +14,7 @@ import net.darylb.stressor.LoadTestContext;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
@@ -95,9 +96,9 @@ public abstract class AbstractHttpAction extends Action {
 	}
 	
 	HttpClient getHttpClient(LoadTestContext cx) {
-		HttpClient ret;
+		ReferringHttpClient ret;
 		if(cx.hasStoryObject(Props.HTTP_CLIENT)) {
-			ret = (HttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
+			ret = (ReferringHttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
 		}
 		else {
 			ret = new ReferringHttpClient();
@@ -109,6 +110,10 @@ public abstract class AbstractHttpAction extends Action {
 	private static volatile int responseCount=0;
 	public void logResponse(LoadTestContext cx, String content) {
 		cx.logFile("response-"+Integer.toString(++responseCount)+".html", content);
+	}
+
+	public CredentialsProvider getCredentialsProvider(LoadTestContext cx) {
+		return null;
 	}
 
 }

@@ -182,4 +182,16 @@ public class LoadTestResults {
 		return ret;
 	}
 	
+	public long getFailedCount() {
+		return failedCount;
+	}
+	
+	public long getPassedCount() {
+		return passedCount;
+	}
+	
+	public long getActionCount() {
+		return actionCount;
+	}
+	
 }
