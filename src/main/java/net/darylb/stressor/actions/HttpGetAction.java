@@ -8,8 +8,8 @@ import net.darylb.stressor.LoadTestContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.Credentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -49,32 +49,58 @@ public abstract class HttpGetAction extends AbstractHttpAction {
 		catch (URISyntaxException e) {
 			throw new RuntimeException("Invalid uri: " + uriString, e);
 		}
-		HttpGet httpget = new HttpGet(uri);
+		HttpGet httpGet = new HttpGet(uri);
 		if(referer!=null) {
-			httpget.setHeader("Referer", referer);
+			httpGet.setHeader("Referer", referer);
 		}
 		HttpClient httpClient = this.getHttpClient(cx);
-		CredentialsProvider credentialsProvider = this.getCredentialsProvider(cx);
+		HttpClientContext context = null;
+		Credentials credentials = this.getCredentials(cx);
 
-		if(credentialsProvider==null) {
-			log.debug("Getting {}", uriString);
-			response = httpClient.execute(httpget);
+		if(credentials==null) {
+			log.debug("Getting {}", uri);
+			response = httpClient.execute(httpGet);
 		}
 		else {
-			HttpClientContext context = HttpClientContext.create();
-			context.setCredentialsProvider(credentialsProvider);
-			log.debug("Getting {} with http auth", uriString);
-			response = httpClient.execute(httpget, context);
+			context = getContext(uri, credentials);
+			log.debug("Getting {} with http auth", uri);
+			response = httpClient.execute(httpGet, context);
 		}
-		log.debug("Get from {} complete", uriString);
 		int requestCount = 1;
 		while( (response.getStatusLine().getStatusCode() == 301 || response.getStatusLine().getStatusCode() == 302) && requestCount++ < MAX_REDIRECTS ) {
 			EntityUtils.consume(response.getEntity());
 			super.parseCookies(response);
-			uri = uri.resolve(response.getFirstHeader("Location").getValue());
-			HttpGet httpGet = new HttpGet(uri);
-			response = httpClient.execute(httpGet);
+			String newLocation = response.getFirstHeader("Location").getValue();
+			URI newUri;
+			try {
+				newUri = new URI(newLocation);
+			}
+			catch (URISyntaxException e) {
+				log.error("Unable to parse redirect URI {}", uri);
+				throw new RuntimeException(e);
+			}
+			// use relative URL resolution if scheme (eg 'http') is not defined
+			if(newUri.getScheme() == null) {
+				// resolve new location relative to old
+				log.debug("Redirect relative to {}", newLocation);
+				uri = uri.resolve(newLocation);
+			}
+			else {
+				uri = newUri;
+				log.debug("Redirect absolute to {}", uri);
+				if(credentials != null) {
+					context = getContext(uri, credentials);
+				}
+			}
+			httpGet = new HttpGet(uri);
+			if(credentials==null) {
+				response = httpClient.execute(httpGet);
+			}
+			else {
+				response = httpClient.execute(httpGet, context);
+			}
 		}
+		log.debug("Get from {} complete", uri);
 		super.parseCookies(response);
 		ret.setRequestCount(requestCount);
 		ret.setStatus(response.getStatusLine().getStatusCode());

@@ -3,6 +3,7 @@ package net.darylb.stressor.actions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -13,10 +14,18 @@ import net.darylb.stressor.LoadTestContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,14 +105,19 @@ public abstract class AbstractHttpAction extends Action {
 	}
 	
 	HttpClient getHttpClient(LoadTestContext cx) {
-		ReferringHttpClient ret;
+		HttpClient ret;
 		if(cx.hasStoryObject(Props.HTTP_CLIENT)) {
-			ret = (ReferringHttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
+			ret = (HttpClient)cx.getStoryObject(Props.HTTP_CLIENT);
 		}
 		else {
-			ret = new ReferringHttpClient();
-			cx.setStoryObject(Props.HTTP_CLIENT, ret);
+			ret = newHttpClient(cx);
 		}
+		return ret;
+	}
+	
+	HttpClient newHttpClient(LoadTestContext cx) {
+		ReferringHttpClient ret = new ReferringHttpClient();
+		cx.setStoryObject(Props.HTTP_CLIENT, ret);
 		return ret;
 	}
 
@@ -112,8 +126,34 @@ public abstract class AbstractHttpAction extends Action {
 		cx.logFile("response-"+Integer.toString(++responseCount)+".html", content);
 	}
 
-	public CredentialsProvider getCredentialsProvider(LoadTestContext cx) {
+	public Credentials getCredentials(LoadTestContext cx) {
 		return null;
 	}
 
+	protected HttpClientContext getContext(URI uri, Credentials credentials) {
+		if(credentials==null) {
+			return null;
+		}
+		HttpClientContext context;
+		context = HttpClientContext.create();
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		int port = uri.getPort();
+		if(port==-1) {
+			if(uri.getScheme() == null) {
+				port = 80;
+			}
+			else {
+				port = uri.getScheme().equals("https") ? 443 : 80;
+			}
+		}
+		credsProvider.setCredentials(new AuthScope(uri.getHost(), port), credentials);
+		context.setCredentialsProvider(credsProvider);
+		// Create AuthCache instance
+		AuthCache authCache = new BasicAuthCache();
+		// Generate BASIC scheme object and add it to the local auth cache
+		BasicScheme basicAuth = new BasicScheme();
+		authCache.put(new HttpHost(uri.getHost()), basicAuth);
+		context.setAuthCache(authCache);
+		return context;
+	}
 }
