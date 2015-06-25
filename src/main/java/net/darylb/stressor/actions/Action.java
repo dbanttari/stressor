@@ -150,6 +150,34 @@ public abstract class Action extends LoadTestHelper {
 		return value.toString();
 	}
 
+	public static void matchJson(String content, String elementName, String match) {
+		matchJson(content, elementName, match, "Could not match JSON element");
+	}
+	/**
+	 * Will attempt to find the value of the named element in the content, once parsed as JSON
+	 * @param content the raw JSON-formatted string
+	 * @param elementName the name of the top-level element being looked for
+	 * @param message the message to display in the RuntimeException generated if the element isn't found
+	 * @return the value of that element
+	 */
+	public static void matchJson(String content, String elementName, String match, String message) {
+		JSONParser parser = new JSONParser();
+		JSONObject json;
+		try {
+			json = (JSONObject)parser.parse(content);
+			Object value = json.get(elementName);
+			if(value==null) {
+				invalid(message);
+			}
+			if(!value.toString().equals(match)) {
+				invalid(message);
+			}
+		}
+		catch (Exception e) {
+			invalid(message, e);
+		}
+	}
+
 	public String getName() {
 		return name;
 	}
