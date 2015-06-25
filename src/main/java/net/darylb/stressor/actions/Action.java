@@ -79,7 +79,7 @@ public abstract class Action extends LoadTestHelper {
 	 */
 	public String findString(String content, Pattern p, String errorMessage) {
 		if(content==null) {
-			invalid("No content returned from action " + this.getClass().getSimpleName());
+			invalid(errorMessage + " (No content)");
 		}
 		Matcher m = p.matcher(content);
 		if(m.find()) {
@@ -105,6 +105,9 @@ public abstract class Action extends LoadTestHelper {
 	 * @return the value of the first capture group matched.
 	 */
 	public static String[] findStrings(String content, Pattern p, String errorMessage) {
+		if(content==null) {
+			invalid(errorMessage + " (No content)");
+		}
 		Matcher m = p.matcher(content);
 		if(m.find()) {
 			int count = m.groupCount();
@@ -135,6 +138,9 @@ public abstract class Action extends LoadTestHelper {
 	 * @return the value of that element
 	 */
 	public static String findJson(String content, String elementName, String message) {
+		if(content==null) {
+			invalid(message + " (No content)");
+		}
 		JSONParser parser = new JSONParser();
 		JSONObject json;
 		try {
@@ -161,6 +167,9 @@ public abstract class Action extends LoadTestHelper {
 	 * @return the value of that element
 	 */
 	public static void matchJson(String content, String elementName, String match, String message) {
+		if(content==null) {
+			invalid(message + " (No content)");
+		}
 		JSONParser parser = new JSONParser();
 		JSONObject json;
 		try {
