@@ -29,12 +29,12 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractHttpAction extends Action {
+public abstract class HttpAction extends Action {
 
 	protected HttpResponse response;
 	
 	@SuppressWarnings("unused")
-	private static Logger log = LoggerFactory.getLogger(AbstractHttpAction.class);
+	private static Logger log = LoggerFactory.getLogger(HttpAction.class);
 	
 	LinkedHashMap<String, HttpCookie> cookies;
 	

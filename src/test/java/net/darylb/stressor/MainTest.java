@@ -23,6 +23,15 @@ public class MainTest {
 	}
 	
 	@Test
+	public void testGetLoadTest_PropertyOverrides() throws Exception {
+		LoadTestDefinition testRunner = new MockTestDefinition();
+		String[] args = {"-threads", "23", "-count", "50", "-set", "foo=bar", "-set", "user.password=testing124"};
+		LoadTest ret = Main.getTest(testRunner, Main.parseOptions(args));
+		assertEquals("bar", ret.getLoadTestContext().getProperty("foo"));
+		assertEquals("testing124", ret.getLoadTestContext().getProperty("user.password"));
+	}
+	
+	@Test
 	public void testGetLoadTest_Timed() throws Exception  {
 		LoadTestDefinition testRunner = new MockTestDefinition();
 		String[] args = {"-threads","23","-duration","123m"};

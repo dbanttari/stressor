@@ -17,7 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class HttpGetAction extends AbstractHttpAction {
+public abstract class HttpGetAction extends HttpAction {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpGetAction.class);
 	
