@@ -63,11 +63,17 @@ public abstract class Story extends LoadTestHelper {
 					action.validate(cx, actionResult.getContent());
 				}
 				catch (Exception e) {
-					String fn = "error-content-" + Integer.toString(errNumber++) + ".txt";
-					log.error("Validation failed; content written to {}", fn, e);
-					actionResult.setFail(e.toString());
-					actionResult.setException(e);
-					cx.logFile(fn, actionResult.getContent());
+					String content = actionResult.getContent();
+					if(content==null || content.equals("")) {
+						log.error("Validation failed; no content available to log", e);
+					}
+					else {
+						String fn = "error-content-" + Integer.toString(errNumber++) + ".txt";
+						log.error("Validation failed; content written to {}", fn, e);
+						actionResult.setFail(e.toString());
+						actionResult.setException(e);
+						cx.logFile(fn, actionResult.getContent());
+					}
 				}
 				testResult.addActionResult(actionResult);
 				lastActionPassed = actionResult.isPassed();
