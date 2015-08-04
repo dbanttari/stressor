@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 public class MultipartForm extends LinkedHashMap<String, Object> {
@@ -15,7 +16,8 @@ public class MultipartForm extends LinkedHashMap<String, Object> {
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		for(Map.Entry<String, Object>entry : this.entrySet()) {
 			if(entry.getValue() instanceof File) {
-				builder.addBinaryBody(entry.getKey(), (File)entry.getValue());
+				File file = (File)entry.getValue();
+				builder.addBinaryBody(entry.getKey(), file, ContentType.APPLICATION_OCTET_STREAM, file.getName());
 			}
 			else {
 				builder.addTextBody(entry.getKey(), entry.getValue().toString());

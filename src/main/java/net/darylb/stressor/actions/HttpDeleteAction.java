@@ -74,7 +74,9 @@ public abstract class HttpDeleteAction extends HttpAction {
 		super.parseCookies(response);
 		ret.setRequestCount(requestCount);
 		ret.setStatus(response.getStatusLine().getStatusCode());
-		if(response.getStatusLine().getStatusCode() != 204) {
+		int statusCode = response.getStatusLine().getStatusCode();
+		// should be 204, but some services return 200
+		if(statusCode != 204 && statusCode != 200) {
 			String reason = "Response code " + response.getStatusLine().getStatusCode();
 			log.warn("Test failure: {}", reason);
 			ret.setFail(reason);

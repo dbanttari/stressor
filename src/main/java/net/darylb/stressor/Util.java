@@ -18,8 +18,6 @@ public class Util {
 	
 	private static Logger log = LoggerFactory.getLogger(Util.class);
 	
-	public static String JSONP_TOKEN = ")]}',\n";
-
 	public static void writeFile(File path, String name, String content) {
 		File f = new File(path, name);
 		FileOutputStream out;

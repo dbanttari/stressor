@@ -1,18 +1,10 @@
 package net.darylb.stressor.ui;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
+import javax.servlet.http.HttpServletRequest;
 
 import net.darylb.stressor.FixedLoadTest;
 import net.darylb.stressor.InMemoryFileLogger;
@@ -24,38 +16,75 @@ import net.darylb.stressor.LoadTestResults;
 import net.darylb.stressor.RateLimiter;
 import net.darylb.stressor.RateLimiterImpl;
 import net.darylb.stressor.TimedLoadTest;
-import net.darylb.stressor.Util;
+import net.darylb.stressor.switchboard.Error404;
+import net.darylb.stressor.switchboard.JsonRequestHandler;
+import net.darylb.stressor.switchboard.Method;
+import net.darylb.stressor.switchboard.RequestHandler;
+import net.darylb.stressor.switchboard.RequestHandlerException;
+import net.darylb.stressor.switchboard.RequestHandlerLocator;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/loadtest")
-public class LoadTestResource {
+public class LoadTestResource extends JsonRequestHandler implements RequestHandlerLocator {
 	
 	private static Logger log = LoggerFactory.getLogger(LoadTestResource.class);
 	
 	static LinkedHashMap<String, LoadTest> activeLoadTests = new LinkedHashMap<String, LoadTest>();
 	
-	@Context UriInfo uriInfo;
+	public LoadTestResource() {
+		super(JSONP_TOKEN);
+	}
+	
+	@Override
+	public RequestHandler handles(Method method, String URI, HttpServletRequest req) {
+		URI = URI.toLowerCase();
+		if(URI.startsWith("/loadtest/") || URI.equals("/loadtest")) {
+			return this;
+		}
+		return null;
+	}
+
+	@Override
+	public String get(String URI, HttpServletRequest req) throws java.io.IOException {
+		if (URI.equalsIgnoreCase("/loadtest")) {
+			return getActiveList();
+		}
+		else {
+			String[] args = URI.split("/");
+			String name = args[args.length-2];
+			String timestamp = args[args.length-1];
+			return getStatus(name, timestamp);
+		}
+	}
+	
+	@Override
+	public String post(String URI, HttpServletRequest req, String content) throws java.io.IOException, RequestHandlerException {
+		if (URI.equalsIgnoreCase("/loadtest")) {
+			throw new RequestHandlerException(405, "Method Not Allowed");
+		}
+		else {
+			String[] args = URI.split("/");
+			String name = args[args.length-1];
+			return create(name, content);
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
-	@GET
-	@Produces({MediaType.APPLICATION_JSON})
-	public String get() {
+	private String getActiveList() {
 		JSONArray ret = new JSONArray();
 		for(Entry<String, LoadTest> test : activeLoadTests.entrySet()) {
 			JSONObject o = new JSONObject();
 			o.put(test.getKey(), test.getValue());
 			ret.add(o);
 		}
-		return Util.JSONP_TOKEN + ret.toJSONString();
+		return ret.toJSONString();
 	}
 	
-	@POST
-	@Path("/{name}")
-	public Response create(@PathParam("name") String name, String json) {
+	@SuppressWarnings("unchecked")
+	public String create(String name, String json) {
 		log.debug(json);
 		LoadTestParams params = LoadTestParams.fromJson(json);
 		
@@ -72,18 +101,17 @@ public class LoadTestResource {
 		t.start();
 		
 		log.debug(params.definition);
-		return Response.ok(loadTest.getStartTime(), "text/plain").build();
+		JSONObject ret = new JSONObject();
+		ret.put("name", name);
+		ret.put("started", loadTest.getStartTime());
+		return ret.toJSONString();
 	}
 	
 	@SuppressWarnings("unchecked")
-	@GET
-	@Path("/{name}/{timestamp}")
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response getStatus(@PathParam("name") String name, @PathParam("timestamp") String timestamp) {
-		ResponseBuilder ret;
+	public String getStatus(String name, String timestamp) throws IOException {
 		LoadTest loadTest = activeLoadTests.get(name+"/"+timestamp);
 		if(loadTest == null) {
-			ret = Response.status(Response.Status.NOT_FOUND);
+			throw new Error404();
 		}
 		else {
 			JSONObject status = new JSONObject();
@@ -93,9 +121,8 @@ public class LoadTestResource {
 			if(results != null) {
 				status.put("results", results.toJson());
 			}
-			ret = Response.ok(status.toJSONString(), "application/json");
+			return status.toJSONString();
 		}
-		return ret.build();
 	}
 
 	private LoadTest createLoadTest(LoadTestParams params) {
@@ -123,6 +150,11 @@ public class LoadTestResource {
 			ret = new TimedLoadTest(cx, def.getStoryFactory(cx), params.threads, params.durationMs);
 		}
 		return ret;
+	}
+
+	@Override
+	public boolean isRepeatable() {
+		return true;
 	}
 	
 }

@@ -156,8 +156,8 @@ public abstract class Action extends LoadTestHelper {
 		return value.toString();
 	}
 
-	public static void matchJson(String content, String elementName, String match) {
-		matchJson(content, elementName, match, "Could not match JSON element");
+	public static void matchJson(String content, String elementName, String mustMatch) {
+		matchJson(content, elementName, mustMatch, "Could not match JSON element");
 	}
 	/**
 	 * Will attempt to find the value of the named element in the content, once parsed as JSON
@@ -166,7 +166,7 @@ public abstract class Action extends LoadTestHelper {
 	 * @param message the message to display in the RuntimeException generated if the element isn't found
 	 * @return the value of that element
 	 */
-	public static void matchJson(String content, String elementName, String match, String message) {
+	public static void matchJson(String content, String elementName, String mustMatch, String message) {
 		if(content==null) {
 			invalid(message + " (No content)");
 		}
@@ -178,7 +178,7 @@ public abstract class Action extends LoadTestHelper {
 			if(value==null) {
 				invalid(message);
 			}
-			if(!value.toString().equals(match)) {
+			if(!value.toString().equals(mustMatch)) {
 				invalid(message);
 			}
 		}

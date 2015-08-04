@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 
 import net.darylb.stressor.actions.Props;
+import net.darylb.stressor.switchboard.Switchboard;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,8 @@ public class LoadTestContext extends Properties {
 			return new HashMap<String, Object>();
 		}
 	};
+	
+	private final Switchboard switchboard = Switchboard.getInstance();
 
 	ComboPooledDataSource pool;
 	
@@ -273,6 +276,9 @@ public class LoadTestContext extends Properties {
 	}
 	public FileLogger getFileLogger() {
 		return this.fileLogger;
+	}
+	public Switchboard getSwitchboard() {
+		return switchboard;
 	}
 
 }
