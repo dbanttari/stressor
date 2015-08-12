@@ -16,10 +16,4 @@ public interface RequestHandler {
 	 */
 	void handle(Method method, String URI, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
-	/**
-	 * If this method returns false, it will be removed from the Switchboard handler list when {@link #handle(method, String, HttpServletRequest, HttpServletResponse)} exits
-	 * @return Should this be left in the handler list?
-	 */
-	boolean isRepeatable();
-
 }

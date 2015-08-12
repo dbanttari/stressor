@@ -2,7 +2,7 @@ package net.darylb.stressor;
 
 import static org.junit.Assert.*;
 
-import java.sql.SQLException;
+import net.darylb.stressor.actions.Props;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,12 +15,9 @@ public class ResultSetQueueTest {
 	Object[][] results = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20}};
 
 	@Test
-	public void testFinite() throws SQLException {
-		MockResultSet rs = new MockResultSet(results);
-		MockStatement s = new MockStatement(rs);
-		MockConnection c = new MockConnection(s);
+	public void testFinite() throws Exception {
 		MockTestContext cx = new MockTestContext("Test","test");
-		cx.setConnection(c);
+		setupDatabaseMock(cx);
 		
 		ResultSetQueue queue = new ResultSetQueue(cx, "select 1 from blah blah blah", false, 10);
 		
@@ -36,12 +33,9 @@ public class ResultSetQueueTest {
 	}
 	
 	@Test
-	public void testInfinite() throws SQLException {
-		MockResultSet rs = new MockResultSet(results);
-		MockStatement s = new MockStatement(rs);
-		MockConnection c = new MockConnection(s);
+	public void testInfinite() throws Exception {
 		MockTestContext cx = new MockTestContext("Test","test");
-		cx.setConnection(c);
+		setupDatabaseMock(cx);
 		
 		ResultSetQueue queue = new ResultSetQueue(cx, "select 1 from blah blah blah", true, 10);
 		
@@ -54,6 +48,15 @@ public class ResultSetQueueTest {
 			count++;
 		}
 		assertEquals(200, count);
+	}
+
+	private void setupDatabaseMock(MockTestContext cx) {
+		MockResultSet rs = new MockResultSet(results);
+		MockStatement s = new MockStatement(rs);
+		MockConnection c = new MockConnection(s);
+		MockDriver.setConnection(c);
+		cx.setProperty(Props.JDBC_DRIVER, MockDriver.class.getName());
+		cx.setProperty(Props.JDBC_URL, "jdbc:mock://foo");
 	}
 
 }

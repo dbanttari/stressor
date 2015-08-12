@@ -41,9 +41,4 @@ public class RequestHandlerError implements RequestHandler {
 		}
 	}
 
-	@Override
-	public boolean isRepeatable() {
-		return true;
-	}
-
 }

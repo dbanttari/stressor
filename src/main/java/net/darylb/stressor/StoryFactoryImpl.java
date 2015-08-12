@@ -47,7 +47,7 @@ public abstract class StoryFactoryImpl extends LoadTestHelper implements StoryFa
 		try {
 			resultSetQueue = new ResultSetQueue(cx, sql, isRepeatable, 20);
 		}
-		catch (SQLException e) {
+		catch (SQLException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -74,7 +74,6 @@ public abstract class StoryFactoryImpl extends LoadTestHelper implements StoryFa
 		if(resultSetQueue != null) {
 			resultSetQueue.shutdown();
 		}
-		cx.close();
 	}
 
 	/* (non-Javadoc)

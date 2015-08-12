@@ -33,7 +33,7 @@ public abstract class HttpPutAction extends HttpAction {
 	}
 
 	protected ActionResult doHttpRequest(LoadTestContext cx, URI uri) {
-		ActionResult ret = new ActionResult(this.getClass().getName());
+		ActionResult ret = new ActionResult(this.getClass().getSimpleName());
 		HttpPut httpPut = new HttpPut(uri);
 		httpPut.setEntity(getHttpEntity());
 		addRequestHeaders(httpPut);

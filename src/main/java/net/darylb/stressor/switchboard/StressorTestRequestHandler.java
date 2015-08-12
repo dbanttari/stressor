@@ -23,9 +23,4 @@ public class StressorTestRequestHandler implements RequestHandlerLocator, Reques
 		out.close();
 	}
 
-	@Override
-	public boolean isRepeatable() {
-		return true;
-	}
-
 }

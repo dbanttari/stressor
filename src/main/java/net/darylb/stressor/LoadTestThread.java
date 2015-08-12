@@ -1,5 +1,7 @@
 package net.darylb.stressor;
 
+import net.darylb.stressor.actions.Action;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,10 @@ public class LoadTestThread implements Runnable {
 				cx.newStory();
 				StoryResult testResult = story.call(cx);
 				testResults.addResult(testResult);
+				// run story cleanup actions (if any)
+				for(Action a : cx.getStoryCleanupActions()) {
+					a.call(cx);
+				}
 			}
 			catch(LoadTestCompleteException t) {
 				isRunning = false;

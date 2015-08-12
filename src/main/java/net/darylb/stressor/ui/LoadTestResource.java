@@ -152,9 +152,4 @@ public class LoadTestResource extends JsonRequestHandler implements RequestHandl
 		return ret;
 	}
 
-	@Override
-	public boolean isRepeatable() {
-		return true;
-	}
-	
 }

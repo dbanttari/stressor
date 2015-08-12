@@ -24,7 +24,9 @@ public class RateLimiterTestDefinition extends LoadTestDefinition {
 	public void test() {
 		long startTick = System.currentTimeMillis();
 		LoadTestContext cx = this.getLoadTestContext();
-		System.out.println(new FixedLoadTest(cx, this.getStoryFactory(cx), 5, 20).run().toString());
+		cx.setRateLimiter(getRateLimiter());
+		// 21 iterations, since the first has no wait, then 20 x 200ms = 4000ms
+		System.out.println(new FixedLoadTest(cx, this.getStoryFactory(cx), 5, 21).run().toString());
 		long dur = System.currentTimeMillis() - startTick;
 		log.info("Total duration: {}ms", dur);
 		assertTrue(dur > 3900L);

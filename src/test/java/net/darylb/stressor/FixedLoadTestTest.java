@@ -16,6 +16,7 @@ public class FixedLoadTestTest {
 		final int ITERATIONS = 20;
 		final int THREADS = 2;
 		MockTestContext cx = new MockTestContext();
+		MockAction.resetCount();
 		StoryFactory fac = new MockStoryFactory(cx);
 		final FixedLoadTest test = new FixedLoadTest(cx, fac, THREADS, ITERATIONS);
 		RateLimiterImpl rateLimiter = new RateLimiterImpl(1100/ITERATIONS); // however many iterations, get it done in ~1sec

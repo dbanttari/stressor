@@ -156,4 +156,14 @@ public abstract class HttpAction extends Action {
 		context.setAuthCache(authCache);
 		return context;
 	}
+	
+	@Override
+	public void validate(LoadTestContext cx, String content) throws Exception {
+		super.validate(cx, content);
+		int status = response.getStatusLine().getStatusCode();
+		if(status==404 || status >= 500) {
+			invalid(status + " response");
+		}
+	}
+	
 }

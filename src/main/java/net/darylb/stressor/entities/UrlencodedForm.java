@@ -1,4 +1,4 @@
-package net.darylb.stressor.entites;
+package net.darylb.stressor.entities;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -39,6 +39,10 @@ public class UrlencodedForm extends LinkedHashMap<String,String> {
 			throw new IllegalArgumentException("Value for '" + key + "' may not be null");
 		}
 		return super.put(key, value);
+	}
+
+	public String put(String key, int value) {
+		return super.put(key, Integer.toString(value));	
 	}
 	
 }

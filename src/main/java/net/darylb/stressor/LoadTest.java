@@ -3,6 +3,11 @@ package net.darylb.stressor;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.darylb.stressor.actions.Action;
+import net.darylb.stressor.actions.Props;
+import net.darylb.stressor.switchboard.PendingRequestHandlerLocator;
+import net.darylb.stressor.switchboard.Switchboard;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +34,11 @@ public abstract class LoadTest {
 	
 	public LoadTestResults run() {
 		this.status = LoadTestStatus.VALIDATING;
+		PendingRequestHandlerLocator pendingRequestHandlerLocator = getPendingRequestHandlerLocator();
+		if(pendingRequestHandlerLocator != null) {
+			Switchboard.getInstance().addLocator(pendingRequestHandlerLocator);
+			cx.put(Props.PENDING_REQUESTS_LOCATOR, pendingRequestHandlerLocator);
+		}
 		try {
 			// do one test as a warmup
 			log.info("Running warmup test");
@@ -81,17 +91,39 @@ public abstract class LoadTest {
 			testResults.testEnded();
 			cx.logFile("index.html", testResults.toHtml());
 			storyFactory.shutdown();
-			cx.close();
+			// run any shutdown actions registered via cx.registerCleanupAction()
+			for(Action a : cx.getCleanupActions()) {
+				try {
+					a.call(cx);
+				}
+				catch(Throwable t) {
+					log.error("Problem running shutdown action", t);
+				}
+			}
 			log.info("{} Results.", testResults.size());
 		}
 		catch(RuntimeException e) {
 			this.status = LoadTestStatus.FAILED;
 			throw e;
 		}
+		finally {
+			if(pendingRequestHandlerLocator != null) {
+				Switchboard.getInstance().removeLocator(pendingRequestHandlerLocator);
+			}
+		}
 		this.status = LoadTestStatus.COMPLETE;
 		return testResults;
 	}
-	
+
+	/**
+	 * Implement this if you're going to use PendingRequestRegisterAction / PendingRequestWaitAction
+	 * Or just have it return PendingRequestHandlerLocator
+	 * @return your implementation of a RequestHandlerLocator
+	 */
+	public PendingRequestHandlerLocator getPendingRequestHandlerLocator() {
+		return null;
+	}
+
 	public abstract void runTests(LoadTestContext cx, StoryFactory testFactory, List<LoadTestThread> threads, LoadTestResults ret);
 
 	public long getStartTime() {
@@ -115,5 +147,5 @@ public abstract class LoadTest {
 	public LoadTestContext getLoadTestContext() {
 		return cx;
 	}
-
+	
 }

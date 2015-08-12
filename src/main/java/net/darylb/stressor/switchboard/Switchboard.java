@@ -1,6 +1,5 @@
 package net.darylb.stressor.switchboard;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,13 +13,10 @@ public class Switchboard {
 	private static final Logger log = LoggerFactory.getLogger(Switchboard.class);
 	private static final Switchboard instance = new Switchboard();
 	
-	private HashMap<Method, LinkedList<RequestHandlerLocator>> handlers = new HashMap<Method, LinkedList<RequestHandlerLocator>>();
+	private LinkedList<RequestHandlerLocator> locators = new LinkedList<RequestHandlerLocator>();
 
 	private Switchboard() {
-		for(Method m : Method.values()) {
-			handlers.put(m, new LinkedList<RequestHandlerLocator>());
-		}
-		addLocator(Method.GET, new StressorTestRequestHandler());
+		addLocator(new StressorTestRequestHandler());
 	}
 	
 	public static Switchboard getInstance() {
@@ -36,11 +32,10 @@ public class Switchboard {
 		String URI = req.getRequestURI().substring(prefix.length());
 		log.info("{} request for {}", method, URI);
 		boolean found = false;
-		LinkedList<RequestHandlerLocator> handlerList = handlers.get(method);
 		LinkedList<RequestHandlerLocator> locators;
 		// to avoid ConcurrentModification errors, we'll iterate over a shallow copy of the list:
-		synchronized(handlerList) {
-			locators = (LinkedList<RequestHandlerLocator>) handlerList.clone();
+		synchronized(this.locators) {
+			locators = (LinkedList<RequestHandlerLocator>) this.locators.clone();
 		}
 		for(RequestHandlerLocator locator : locators) {
 			RequestHandler handler = locator.handles(method, URI, req);
@@ -50,21 +45,9 @@ public class Switchboard {
 				try {
 					handler.handle(method, URI, req, resp);
 				}
-				catch(RequestHandlerException e) {
-					log.error("Error handling {} {}", method, req.getRequestURL(), e);
-					new RequestHandlerError(e).handle(method, URI, req, resp);
-				}
 				catch(Throwable t) {
 					log.error("Error handling {} {}", method, req.getRequestURL(), t);
 					new RequestHandlerError(t).handle(method, URI, req, resp);
-				}
-				finally {
-					if(!handler.isRepeatable()) {
-						// make sure we're the only ones looking at _handlers when we remove this one
-						synchronized(handlerList) {
-							handlerList.remove(locator);
-						}
-					}
 				}
 			}
 		}
@@ -75,17 +58,15 @@ public class Switchboard {
 	}
 	
 	// helper methods to safely modify locators
-	public void addLocator(Method method, RequestHandlerLocator handler) {
-		LinkedList<RequestHandlerLocator> handlerList = handlers.get(method);
-		synchronized(handlerList) {
-			handlerList.addFirst(handler);
+	public void addLocator(RequestHandlerLocator handler) {
+		synchronized(this.locators) {
+			this.locators.addFirst(handler);
 		}
 	}
 	
-	public void removeLocator(Method method, RequestHandlerLocator handler) {
-		LinkedList<RequestHandlerLocator> handlerList = handlers.get(method);
-		synchronized(handlerList) {
-			handlerList.remove(handler);
+	public void removeLocator(RequestHandlerLocator handler) {
+		synchronized(this.locators) {
+			this.locators.remove(handler);
 		}
 	}
 	

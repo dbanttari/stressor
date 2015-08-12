@@ -60,9 +60,6 @@ public abstract class JsonRequestHandler implements RequestHandler {
 		out.close();
 	}
 
-	@Override
-	public abstract boolean isRepeatable();
-
 	public String getPostedContent(HttpServletRequest req) throws IOException {
 		ServletInputStream _in = req.getInputStream();
 		BufferedReader in = new BufferedReader(new InputStreamReader(_in));

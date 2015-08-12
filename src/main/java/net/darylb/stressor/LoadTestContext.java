@@ -1,19 +1,15 @@
 package net.darylb.stressor;
 
-import java.beans.PropertyVetoException;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import net.darylb.stressor.actions.Props;
+import net.darylb.stressor.actions.Action;
 import net.darylb.stressor.switchboard.Switchboard;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * This is responsible for holding global properties (it extends Properties, and will automatically
@@ -44,8 +40,6 @@ public class LoadTestContext extends Properties {
 	
 	private final Switchboard switchboard = Switchboard.getInstance();
 
-	ComboPooledDataSource pool;
-	
 	public LoadTestContext(String name, String logDir) {
 		this(name);
 		this.fileLogger = new FilesystemFileLogger(logDir);
@@ -73,18 +67,9 @@ public class LoadTestContext extends Properties {
 	 * left over from the previous test that used this thread
 	 */
 	public void newStory() {
-		LinkedList<Connection> _storyConnections = storyConnections.get();
-		for(Connection c : _storyConnections) {
-			try {
-				c.close();
-			}
-			catch (SQLException e) {
-				log.warn("Failed to close story connection", e);
-			}
-		}
-		_storyConnections.clear();
-		// make sure the new story gets new story properties every time
+		// make sure the new story gets new story properties and cleanup actions every time
 		storyProperties.set(new HashMap<String,Object>());
+		storyCleanupActions = new LinkedHashMap<String, Action>();
 	}
 
 	/**
@@ -179,77 +164,6 @@ public class LoadTestContext extends Properties {
 		return storyProperties.get().containsKey(key) || this.containsKey(key);
 	}
 
-
-	/*****   Database Connection Management *****/
-	
-	ThreadLocal<LinkedList<Connection>>storyConnections = new ThreadLocal<LinkedList<Connection>>() {
-		@Override
-		protected LinkedList<Connection> initialValue() {
-			return new LinkedList<Connection>();
-		}
-	};
-	
-	private void createPool() {
-		if(this.containsKey("jdbc.driver")) {
-			log.info("Initializing {} connection pool", this.getProperty(Props.JDBC_DRIVER));
-			pool = new ComboPooledDataSource();
-			try {
-				pool.setDriverClass(this.getProperty(Props.JDBC_DRIVER));
-			}
-			catch (PropertyVetoException e) {
-				throw new RuntimeException(e);
-			}
-			pool.setJdbcUrl(this.getProperty(Props.JDBC_URL));
-			if(this.containsKey(Props.JDBC_USERNAME)) {
-				pool.setUser(this.getProperty(Props.JDBC_USERNAME));
-				pool.setPassword(this.getProperty(Props.JDBC_PASSWORD));
-			}
-			int numThreads = getNumThreads();
-			log.info("Num threads: {}", numThreads);
-			pool.setMaxPoolSize(10+numThreads*3);
-			pool.setMaxStatements(10+numThreads*3);
-			pool.setMaxStatementsPerConnection(10);
-			pool.setMinPoolSize(numThreads);
-		}
-	}
-
-	/**
-	 * Returns a connection from the JDBC connection pool.  The caller is expected to eventually call {@link Connection#close}
-	 * @return a JDBC connection defined by jdbc.driver plus jdbc.url in stressor.properties
-	 * @throws SQLException
-	 */
-	public Connection getConnection() throws SQLException {
-		if(pool==null) {
-			createPool();
-		}
-		Connection ret = pool.getConnection();
-		return ret;
-	}
-
-	/**
-	 * Returns a connection from the JDBC connection pool.  The connection will automatically be closed before the next Story
-	 * is run on the current thread.
-	 * @return a JDBC connection defined by jdbc.driver plus jdbc.url in stressor.properties
-	 * @throws SQLException
-	 */
-	public Connection getStoryConnection() throws SQLException {
-		if(pool==null) {
-			createPool();
-		}
-		Connection ret = pool.getConnection();
-		storyConnections.get().add(ret);
-		return ret;
-	}
-
-	/**
-	 * Closes the JDBC connection pool, if defined.
-	 */
-	public void close() {
-		if(pool != null) {
-			pool.close();
-		}
-	}
-	
 	/****  Rate Limiting ****/
 	private RateLimiter rateLimiter;
 	public void setRateLimiter(RateLimiter rateLimiter) {
@@ -279,6 +193,41 @@ public class LoadTestContext extends Properties {
 	}
 	public Switchboard getSwitchboard() {
 		return switchboard;
+	}
+	
+	/**** Auto Cleanup ****/
+	private LinkedHashMap<String, Action> storyCleanupActions;
+	/**
+	 * If you have an action that needs an end-of-story "finally" action to clean up, you
+	 * can register the action here, and they will be run (in order of appearance) at the
+	 * end of the story.  The unique key is used to ensure only one shutdown action of each
+	 * type is run; for example, if a user runs three actions against the same MongoDB
+	 * database, you can use a unique key for the connection that's used for all three,
+	 * so it only gets closed once.
+	 * @param uniqueKey
+	 * @param cleanupAction
+	 */
+	public void registerStoryCleanupAction(String uniqueKey, Action cleanupAction) {
+		storyCleanupActions.put(uniqueKey, cleanupAction);
+	}
+	public Collection<Action> getStoryCleanupActions() {
+		return storyCleanupActions.values();
+	}
+	
+	private LinkedHashMap<String, Action> cleanupActions = new LinkedHashMap<String, Action>();
+	/**
+	 * If you have an action that needs an end-of-test "finally" action to clean up, you
+	 * can register the action here, and they will be run (in order of appearance) at the
+	 * end of the test.  The unique key is used to ensure only one shutdown action of each
+	 * type is run; see DatabaseAction for an example.
+	 * @param uniqueKey
+	 * @param cleanupAction
+	 */
+	public void registerCleanupAction(String uniqueKey, Action cleanupAction) {
+		cleanupActions.put(uniqueKey, cleanupAction);
+	}
+	public Collection<Action> getCleanupActions() {
+		return cleanupActions.values();
 	}
 
 }

@@ -57,6 +57,7 @@ public abstract class HttpPostAction extends HttpAction {
 		addRequestHeaders(httpPost);
 		HttpClient httpClient = getHttpClient(cx);
 		log.debug("Posting to {}", uriString);
+		//log.debug("Headers: {}{}", "", httpPost.getAllHeaders());
 		response = httpClient.execute(httpPost);
 		log.debug("Post to {} complete", uriString);
 		int hitCount = 1;

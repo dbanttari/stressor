@@ -1,4 +1,4 @@
-package net.darylb.stressor.entites;
+package net.darylb.stressor.entities;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -8,6 +8,11 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
+/**
+ * A helper class to build a multipart form for use with HttpPostAction
+ * @author daryl
+ *
+ */
 public class MultipartForm extends LinkedHashMap<String, Object> {
 	
 	private static final long serialVersionUID = -9070362348287370432L;
