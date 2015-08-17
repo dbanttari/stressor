@@ -2,10 +2,22 @@ package net.darylb.stressor;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FixedLoadTest extends LoadTest {
 	
-	public FixedLoadTest(LoadTestContext cx, StoryFactory storyFactory, int numThreads, int numTests) {
-		super(cx, new FixedLoadTestStoryFactory(storyFactory, numTests), numThreads);
+	private static Logger log = LoggerFactory.getLogger(FixedLoadTest.class);
+	
+	private int numTests;
+	private LoadTestDefinition def;
+	private FixedLoadTestStoryFactory wrappedStoryFactory;
+
+	public FixedLoadTest(LoadTestDefinition def, int numThreads, int numTests) {
+		super(def, numThreads);
+		this.def = def;
+		this.numTests = numTests;
+		log.debug("Configured for {} tests", numTests);
 	}
 
 	@Override
@@ -17,8 +29,16 @@ public class FixedLoadTest extends LoadTest {
 
 	@Override
 	public double getProgressPct() {
-		FixedLoadTestStoryFactory fac = (FixedLoadTestStoryFactory)super.getStoryFactory();
+		FixedLoadTestStoryFactory fac = (FixedLoadTestStoryFactory)getWrappedStoryFactory(def);
 		return fac.getProgressPct();
+	}
+
+	@Override
+	protected StoryFactory getWrappedStoryFactory(LoadTestDefinition def) {
+		if(wrappedStoryFactory == null) {
+			wrappedStoryFactory = new FixedLoadTestStoryFactory(def.getStoryFactory(def.getLoadTestContext()), numTests);
+		}
+		return wrappedStoryFactory;
 	}
 
 }

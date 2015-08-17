@@ -27,10 +27,10 @@ public class Switchboard {
 	public void handle(Method method, HttpServletRequest req, HttpServletResponse resp) {
 		// prefix is, effectively, the name of the war file.
 		// In practice, this should be ROOT.war, for which Tomcat makes the prefix "/",
-		// but for testing this is "stressor" or whatever your Eclipse project name is.
+		// but for testing within Eclipse this is probably "/stressor" or whatever your Eclipse project name is.
 		String prefix = req.getContextPath();
-		String URI = req.getRequestURI().substring(prefix.length());
-		log.info("{} request for {}", method, URI);
+		String URI = req.getRequestURI().substring(prefix.length()-1);
+		log.debug("{} request for {}", method, URI);
 		boolean found = false;
 		LinkedList<RequestHandlerLocator> locators;
 		// to avoid ConcurrentModification errors, we'll iterate over a shallow copy of the list:
@@ -40,7 +40,7 @@ public class Switchboard {
 		for(RequestHandlerLocator locator : locators) {
 			RequestHandler handler = locator.handles(method, URI, req);
 			if(handler != null) {
-				log.info("Request for {} handled by {}", URI, locator.getClass().getName());
+				log.debug("Request for {} handled by {}", URI, locator.getClass().getName());
 				found = true;
 				try {
 					handler.handle(method, URI, req, resp);

@@ -1,30 +1,22 @@
 package net.darylb.stressor.actions;
 
-public class PendingRequestSemaphore {
+import java.util.concurrent.TimeoutException;
+
+import net.darylb.stressor.switchboard.RequestHandler;
+
+/**
+ * This extends RequestHandler because Switchboard will ping this as if it were one.
+ * see PendingRequestSemaphoreImpl
+ * @author daryl
+ *
+ */
+public interface PendingRequestSemaphore extends RequestHandler {
 
 	/**
-	 * to prevent possible race conditions between RegisterAction and WaitAction,
-	 * we use this flag to short-circuit join() into immediately responding.
+	 * Wait for notification for up to this duration.
+	 * @param timeoutMs maximum time to wait for notification
+	 * @throws TimeoutException if no notification arrives before timeout
 	 */
-	private boolean triggered = false;
-	
-	public void trigger() {
-		synchronized (this) {
-			triggered = true;
-		}
-	}
-	
-	public void join(long timeoutMs) {
-		synchronized (this) {
-			if(!triggered) {
-				try {
-					this.wait(timeoutMs);
-				}
-				catch (InterruptedException e) {
-					Thread.interrupted();
-				}
-			}
-		}
-	}
-	
+	void join(long timeoutMs) throws TimeoutException;
+
 }

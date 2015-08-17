@@ -16,25 +16,34 @@ public abstract class LoadTest {
 	private static Logger log = LoggerFactory.getLogger(LoadTest.class);
 	
 	private final int numThreads;
-	private final LoadTestContext cx;
-	private final StoryFactory storyFactory;
-	private final long startTime;
+	private LoadTestContext cx;
+	private StoryFactory storyFactory;
+	private long startTime;
 
 	private LoadTestResults testResults;
 	private LoadTestStatus status = LoadTestStatus.PENDING;
+	private PendingRequestHandlerLocator pendingRequestHandlerLocator;
 
-	public LoadTest(LoadTestContext cx, StoryFactory storyFactory, int numThreads) {
-		this.cx = cx;
+	private LoadTestDefinition def;
+
+	public LoadTest(LoadTestDefinition def, int numThreads) {
+		this.def = def;
 		this.numThreads = numThreads;
-		cx.setNumThreads(numThreads);
-		this.startTime = System.currentTimeMillis() / 1000L;
-		this.storyFactory = storyFactory;
-		cx.setNumThreads(numThreads);
 	}
 	
 	public LoadTestResults run() {
+		cx = def.getLoadTestContext();
+		cx.setNumThreads(numThreads);
+		RateLimiter rateLimiter = def.getRateLimiter();
+		if(rateLimiter != null) {
+			cx.setRateLimiter(rateLimiter);
+		}
+		this.storyFactory = getWrappedStoryFactory(def);
+		this.pendingRequestHandlerLocator = def.getPendingRequestHandlerLocator();
+		this.startTime = System.currentTimeMillis() / 1000L;
+		cx.setNumThreads(numThreads);
+
 		this.status = LoadTestStatus.VALIDATING;
-		PendingRequestHandlerLocator pendingRequestHandlerLocator = getPendingRequestHandlerLocator();
 		if(pendingRequestHandlerLocator != null) {
 			Switchboard.getInstance().addLocator(pendingRequestHandlerLocator);
 			cx.put(Props.PENDING_REQUESTS_LOCATOR, pendingRequestHandlerLocator);
@@ -49,12 +58,12 @@ public abstract class LoadTest {
 				story = storyFactory.getRateLimitedStory();
 			}
 			catch (Exception e) {
-				log.error("Warmup test failed; no Story provided by {}.", storyFactory.getName(), e);
+				log.error("Warmup test failed; exception getting Story from {}.", storyFactory.getName(), e);
 				this.status = LoadTestStatus.FAILED;
 				return testResults;
 			}
 			if(story==null) {
-				log.error("Warmup test failed; no story provided by {}.", storyFactory.getName());
+				log.error("Warmup test failed; no Story provided by {}.", storyFactory.getName());
 				this.status = LoadTestStatus.FAILED;
 				return testResults;			
 			}
@@ -115,15 +124,6 @@ public abstract class LoadTest {
 		return testResults;
 	}
 
-	/**
-	 * Implement this if you're going to use PendingRequestRegisterAction / PendingRequestWaitAction
-	 * Or just have it return PendingRequestHandlerLocator
-	 * @return your implementation of a RequestHandlerLocator
-	 */
-	public PendingRequestHandlerLocator getPendingRequestHandlerLocator() {
-		return null;
-	}
-
 	public abstract void runTests(LoadTestContext cx, StoryFactory testFactory, List<LoadTestThread> threads, LoadTestResults ret);
 
 	public long getStartTime() {
@@ -144,8 +144,6 @@ public abstract class LoadTest {
 		return status;
 	}
 
-	public LoadTestContext getLoadTestContext() {
-		return cx;
-	}
+	protected abstract StoryFactory getWrappedStoryFactory(LoadTestDefinition def);
 	
 }

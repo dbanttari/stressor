@@ -143,11 +143,11 @@ public class LoadTestResource extends JsonRequestHandler implements RequestHandl
 		LoadTest ret;
 		if(params.type.equals("counted")) {
 			// fixed iteration count
-			ret = new FixedLoadTest(cx, def.getStoryFactory(cx), params.threads, params.iterationCount);
+			ret = new FixedLoadTest(def, params.threads, params.iterationCount);
 		}
 		else {
 			// timed
-			ret = new TimedLoadTest(cx, def.getStoryFactory(cx), params.threads, params.durationMs);
+			ret = new TimedLoadTest(def, params.threads, params.durationMs);
 		}
 		return ret;
 	}

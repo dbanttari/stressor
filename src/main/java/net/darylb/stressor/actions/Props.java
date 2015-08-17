@@ -11,5 +11,6 @@ public class Props {
 	public static final String STRESSOR_PACKAGE = "stressor.package";
 	public static final String PENDING_REQUESTS_LOCATOR = "stressor.pending-requests";
 	public static final String STRESSOR_PENDING_CALLBACK_STORY_SEMAPHORE = "stressor.story.pending-request";
+	public static final String PENDING_REQUEST_TOKEN = "stressor.pending-request.token";
 
 }

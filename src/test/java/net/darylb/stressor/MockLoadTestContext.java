@@ -1,14 +1,14 @@
 package net.darylb.stressor;
 
-public class MockTestContext extends LoadTestContext {
+public class MockLoadTestContext extends LoadTestContext {
 
 	private static final long serialVersionUID = -1804751449059619804L;
 
-	public MockTestContext() {
+	public MockLoadTestContext() {
 		this("UnitTest", "test");
 	}
 	
-	public MockTestContext(String name, String logDir) {
+	public MockLoadTestContext(String name, String logDir) {
 		super(name, logDir);
 	}
 	

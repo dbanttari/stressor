@@ -1,26 +1,44 @@
 package net.darylb.stressor;
 
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
-import net.darylb.stressor.actions.MockAction;
 
+import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockSupport;
+import org.easymock.Mock;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FixedLoadTestTest {
+@RunWith(EasyMockRunner.class) 
+public class FixedLoadTestTest extends EasyMockSupport {
 
 	private static Logger log = LoggerFactory.getLogger(FixedLoadTestTest.class);
 
+	@Mock
+	private LoadTestDefinition def;
+	
 	@Test
 	public void test() throws Exception {
 		final int ITERATIONS = 20;
 		final int THREADS = 2;
-		MockTestContext cx = new MockTestContext();
-		MockAction.resetCount();
-		StoryFactory fac = new MockStoryFactory(cx);
-		final FixedLoadTest test = new FixedLoadTest(cx, fac, THREADS, ITERATIONS);
-		RateLimiterImpl rateLimiter = new RateLimiterImpl(1100/ITERATIONS); // however many iterations, get it done in ~1sec
-		cx.setRateLimiter(rateLimiter);
+
+		// configure mock
+		LoadTestContext cx = new MockLoadTestContext();
+		expect(def.getLoadTestContext())
+			.andReturn(cx)
+			.atLeastOnce();
+		expect(def.getRateLimiter())
+			.andReturn(new RateLimiterImpl(1100/ITERATIONS));
+		expect(def.getStoryFactory(cx))
+			.andReturn(new MockStoryFactory(cx))
+			.atLeastOnce();
+		expect(def.getPendingRequestHandlerLocator())
+			.andReturn(null);
+		replayAll();
+		
+		final FixedLoadTest test = new FixedLoadTest(def, THREADS, ITERATIONS);
 		Thread t = new Thread(new Runnable() {
 
 			@Override
@@ -42,6 +60,6 @@ public class FixedLoadTestTest {
 		log.debug("Current progress {}%", test.getProgressPct());
 		assertTrue("end at 100%", test.getProgressPct() == 100.0);
 		t.join();
-		assertEquals(ITERATIONS, MockAction.getCount());
+		verifyAll();
 	}
 }

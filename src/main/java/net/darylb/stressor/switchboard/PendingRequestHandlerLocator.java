@@ -4,32 +4,32 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.darylb.stressor.actions.PendingRequestSemaphore;
+
 /**
  * Use this if you're using tokens to create one-off requests using content tokens.
  * 
  * @author daryl
  *
  */
-public abstract class PendingRequestHandlerLocator implements RequestHandlerLocator {
+public class PendingRequestHandlerLocator implements RequestHandlerLocator {
 
-	HashMap<String, Object> waiting = new HashMap<String, Object>();
+	HashMap<String, PendingRequestSemaphore> waiting = new HashMap<String, PendingRequestSemaphore>();
 	
 	@Override
 	public RequestHandler handles(Method method, String URI, HttpServletRequest req) {
 		String token = getToken(method, URI, req);
 		if(waiting.containsKey(token)) {
-			Object o;
+			PendingRequestSemaphore o;
 			synchronized (waiting) {
 				o = waiting.remove(token);
 			}
-			synchronized (o) {
-				o.notify();
-			}
+			return o;
 		}
 		return null;
 	}
 
-	public void register(String token, Object waiting) {
+	public void register(String token, PendingRequestSemaphore waiting) {
 		synchronized(this.waiting) {
 			this.waiting.put(token, waiting);
 		}

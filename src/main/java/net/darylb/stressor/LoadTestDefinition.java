@@ -1,5 +1,8 @@
 package net.darylb.stressor;
 
+import static org.junit.Assert.assertEquals;
+import net.darylb.stressor.switchboard.PendingRequestHandlerLocator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +18,8 @@ public abstract class LoadTestDefinition {
 	
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(LoadTestDefinition.class);
-	private String name ;
+	private String name;
+	private LoadTestContext cachedLoadTestContext;
 
 	public LoadTestDefinition() {
 		this.name = this.getClass().getSimpleName();
@@ -35,12 +39,15 @@ public abstract class LoadTestDefinition {
 	/**
 	 * Returns a configured TestContext object (which, by default, will load global
 	 * properties from stressor.properties in the current directory.)  Implementors
-	 * may override this if simply reading properties from stressor.properties will
+	 * may override this, if simply reading properties from stressor.properties will
 	 * not suffice.
 	 * @return a configured TestContext
 	 */
 	public LoadTestContext getLoadTestContext() {
-		return new LoadTestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());
+		if(cachedLoadTestContext == null) {
+			cachedLoadTestContext = new LoadTestContext(name, "loadtests/" + name + "/" + Util.getTimestamp());;
+		}
+		return cachedLoadTestContext;
 	}
 
 	/**
@@ -52,6 +59,23 @@ public abstract class LoadTestDefinition {
 	public RateLimiter getRateLimiter() {
 		// by default, use no rate limit. 
 		return null;
+	}
+	
+	/**
+	 * Implement this if you're going to use PendingRequestRegisterAction / PendingRequestWaitAction
+	 * Or just have it return PendingRequestHandlerLocator
+	 * @return your implementation of a RequestHandlerLocator
+	 */
+	public PendingRequestHandlerLocator getPendingRequestHandlerLocator() {
+		return null;
+	}
+
+	public void runSingleIterationTest() {
+		int threads = 1;
+		int count = 1;
+		LoadTestResults results = new FixedLoadTest(this, threads, count).run();
+		System.out.println(results);
+		assertEquals(0, results.getFailedCount());
 	}
 	
 }

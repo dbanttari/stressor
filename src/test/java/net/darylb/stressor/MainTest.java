@@ -26,9 +26,9 @@ public class MainTest {
 	public void testGetLoadTest_PropertyOverrides() throws Exception {
 		LoadTestDefinition testRunner = new MockTestDefinition();
 		String[] args = {"-threads", "23", "-count", "50", "-set", "foo=bar", "-set", "user.password=testing124"};
-		LoadTest ret = Main.getTest(testRunner, Main.parseOptions(args));
-		assertEquals("bar", ret.getLoadTestContext().getProperty("foo"));
-		assertEquals("testing124", ret.getLoadTestContext().getProperty("user.password"));
+		Main.getTest(testRunner, Main.parseOptions(args));
+		assertEquals("bar", testRunner.getLoadTestContext().getProperty("foo"));
+		assertEquals("testing124", testRunner.getLoadTestContext().getProperty("user.password"));
 	}
 	
 	@Test
@@ -46,7 +46,7 @@ public class MainTest {
 		String[] args = {"-threads","23","-count","50","-limit","10s"};
 		LoadTest ret = Main.getTest(testRunner, Main.parseOptions(args));
 		assertEquals("FixedLoadTest", ret.getClass().getSimpleName());
-		RateLimiterImpl rateLimiter = (RateLimiterImpl)ret.getLoadTestContext().getRateLimiter();
+		RateLimiterImpl rateLimiter = (RateLimiterImpl)testRunner.getLoadTestContext().getRateLimiter();
 		assertEquals(100, rateLimiter.getRateLimit());
 	}
 	

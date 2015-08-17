@@ -14,12 +14,12 @@ public class TimedLoadTest extends LoadTest {
 
 	private long duration;
 	
-	public TimedLoadTest(LoadTestContext cx, StoryFactory storyFactory, int numThreads, String duration) {
-		this(cx, storyFactory, numThreads, Util.parseDuration(duration));
+	public TimedLoadTest(LoadTestDefinition def, int numThreads, String duration) {
+		this(def, numThreads, Util.parseDuration(duration));
 	}
 	
-	public TimedLoadTest(LoadTestContext cx, StoryFactory storyFactory, int numThreads, long duration) {
-		super(cx, storyFactory, numThreads);
+	public TimedLoadTest(LoadTestDefinition def, int numThreads, long duration) {
+		super(def, numThreads);
 		this.duration = duration;
 		this.startTick = System.currentTimeMillis();
 		this.endTick = this.startTick + duration;
@@ -52,5 +52,10 @@ public class TimedLoadTest extends LoadTest {
 		long elapsed = System.currentTimeMillis() - startTick;
 		return 100.0 * Math.min(1.0, (double)elapsed / (double)duration);
 	}
-	
+
+	@Override
+	protected StoryFactory getWrappedStoryFactory(LoadTestDefinition def) {
+		return def.getStoryFactory(def.getLoadTestContext());
+	}
+
 }

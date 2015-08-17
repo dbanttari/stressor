@@ -16,7 +16,7 @@ public class ResultSetQueueTest {
 
 	@Test
 	public void testFinite() throws Exception {
-		MockTestContext cx = new MockTestContext("Test","test");
+		MockLoadTestContext cx = new MockLoadTestContext("Test","test");
 		setupDatabaseMock(cx);
 		
 		ResultSetQueue queue = new ResultSetQueue(cx, "select 1 from blah blah blah", false, 10);
@@ -34,7 +34,7 @@ public class ResultSetQueueTest {
 	
 	@Test
 	public void testInfinite() throws Exception {
-		MockTestContext cx = new MockTestContext("Test","test");
+		MockLoadTestContext cx = new MockLoadTestContext("Test","test");
 		setupDatabaseMock(cx);
 		
 		ResultSetQueue queue = new ResultSetQueue(cx, "select 1 from blah blah blah", true, 10);
@@ -50,7 +50,7 @@ public class ResultSetQueueTest {
 		assertEquals(200, count);
 	}
 
-	private void setupDatabaseMock(MockTestContext cx) {
+	private void setupDatabaseMock(MockLoadTestContext cx) {
 		MockResultSet rs = new MockResultSet(results);
 		MockStatement s = new MockStatement(rs);
 		MockConnection c = new MockConnection(s);

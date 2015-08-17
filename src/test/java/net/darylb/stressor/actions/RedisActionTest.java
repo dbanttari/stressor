@@ -1,7 +1,7 @@
 package net.darylb.stressor.actions;
 
 import static org.junit.Assert.*;
-import net.darylb.stressor.MockTestContext;
+import net.darylb.stressor.MockLoadTestContext;
 import net.darylb.stressor.LoadTestContext;
 
 import org.junit.Ignore;
@@ -31,7 +31,7 @@ public class RedisActionTest {
 	
 	@Test @Ignore
 	public void test() {
-		MockTestContext cx = new MockTestContext();
+		MockLoadTestContext cx = new MockLoadTestContext();
 		// redis must be available at this location:
 		cx.setProperty("jedis.host", "localhost");
 		new TestRedisAction().call(cx);

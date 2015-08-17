@@ -90,13 +90,11 @@ public class Main {
 		LoadTestContext cx = testRunner.getLoadTestContext();
 		if(cmd.hasOption("count")) {
 			// run static number of tests
-			cx.setRateLimiter(testRunner.getRateLimiter());
-			ret = new FixedLoadTest(cx, testRunner.getStoryFactory(cx), threads, Integer.parseInt(cmd.getOptionValue("count")));
+			ret = new FixedLoadTest(testRunner, threads, Integer.parseInt(cmd.getOptionValue("count")));
 		}
 		else if (cmd.hasOption("duration")) {
 			// run for a specified duration
-			cx.setRateLimiter(testRunner.getRateLimiter());
-			ret = new TimedLoadTest(cx, testRunner.getStoryFactory(cx), threads, cmd.getOptionValue("duration"));
+			ret = new TimedLoadTest(testRunner, threads, cmd.getOptionValue("duration"));
 		}
 		else {
 			return null;
@@ -106,7 +104,7 @@ public class Main {
 			int num = Integer.parseInt(option.substring(0, option.length()-1));
 			Interval interval = Interval.getInterval(option.charAt(option.length()-1));
 			RateLimiterImpl rateLimiter = new RateLimiterImpl(num, interval);
-			ret.getLoadTestContext().setRateLimiter(rateLimiter);
+			cx.setRateLimiter(rateLimiter);
 		}
 		
 		if(cmd.hasOption("set")) {
