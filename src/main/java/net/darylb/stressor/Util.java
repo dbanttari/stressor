@@ -6,7 +6,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -79,5 +84,31 @@ public class Util {
 		ThreadLocalRandom.current().nextBytes(bytes);
 		return new Base64().encodeAsString(bytes);
 	}
-	
+
+	/**
+	 * Looks for any bound IP address that starts with some prefix, eg "10."
+	 * @return string representation of matching IP
+	 */
+	public static String getLocalIpByPrefix(String prefix) {
+		Enumeration<NetworkInterface> nets;
+		try {
+			nets = NetworkInterface.getNetworkInterfaces();
+		}
+		catch (SocketException e) {
+			// should never happen
+			throw new RuntimeException(e);
+		}
+        for (NetworkInterface iface : Collections.list(nets)) {
+        	Enumeration<InetAddress> inetAddresses = iface.getInetAddresses();
+            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+            	String addr = inetAddress.getHostAddress();
+                if(addr.startsWith(prefix)) {
+                	log.debug("Using callback IP {}", addr);
+                	return addr;
+                }
+            }
+        }
+        throw new RuntimeException("No address matching " + prefix + " is local to this computer");
+	}
+		
 }

@@ -34,7 +34,7 @@ public class FixedLoadTestTest extends EasyMockSupport {
 		expect(def.getStoryFactory(cx))
 			.andReturn(new MockStoryFactory(cx))
 			.atLeastOnce();
-		expect(def.getPendingRequestHandlerLocator())
+		expect(def.getPendingRequestHandlerLocator(cx))
 			.andReturn(null);
 		replayAll();
 		

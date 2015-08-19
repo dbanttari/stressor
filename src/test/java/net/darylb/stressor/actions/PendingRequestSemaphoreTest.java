@@ -57,25 +57,27 @@ public class PendingRequestSemaphoreTest extends EasyMockSupport {
 		// add handler to Switchboard.  Normally handled in LoadTest.run()
 		Switchboard switchboard = Switchboard.getInstance();
 		switchboard.addLocator(loc);
-		// register with LoadTestContext so RegisterAction can find it. Also done in LoadTest.run()
-		LoadTestContext cx = new MockLoadTestContext();
-		cx.put(Props.PENDING_REQUESTS_LOCATOR, loc);
-
-		// here we'll pretend to be a story that
-		// - registers a callback token
-		// - receives an HTTP request with that token
-		// - doesn't even wait 1ms when PendingRequestWaitAction is called (since the semaphore should have been poked during switchboard.handle())
-		new PendingRequestRegisterAction(token, responseGenerator).call(cx);
-		// pretend request happened.  Should notify the STRESSOR_PENDING_CALLBACK_STORY_SEMAPHORE story object
-		switchboard.handle(Method.GET, mockRequest, mockResponse);
-		// now wait for that request.  Should be no wait
-		ActionResult ret = new PendingRequestWaitAction(1L).call(cx);
-		assertTrue(ret.isPassed());
-		
-		verify(mockRequest);
-		verify(mockSemaphore);
-		
-		switchboard.removeLocator(loc);
+		try {
+			// register with LoadTestContext so RegisterAction can find it. Also done in LoadTest.run()
+			LoadTestContext cx = new MockLoadTestContext();
+			cx.put(Props.PENDING_REQUESTS_LOCATOR, loc);
+	
+			// here we'll pretend to be a story that
+			// - registers a callback token
+			// - receives an HTTP request with that token
+			// - doesn't even wait 1ms when PendingRequestWaitAction is called (since the semaphore should have been poked during switchboard.handle())
+			new PendingRequestRegisterAction(token, responseGenerator).call(cx);
+			// pretend request happened.  Should notify the STRESSOR_PENDING_CALLBACK_STORY_SEMAPHORE story object
+			switchboard.handle(Method.GET, mockRequest, mockResponse);
+			// now wait for that request.  Should be no wait
+			ActionResult ret = new PendingRequestWaitAction(1L).call(cx);
+			assertTrue(ret.isPassed());
+			
+			verifyAll();
+		}
+		finally {
+			switchboard.removeLocator(loc);
+		}
 		
 	}
 

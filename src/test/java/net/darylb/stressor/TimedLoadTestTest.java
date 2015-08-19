@@ -31,7 +31,7 @@ public class TimedLoadTestTest extends EasyMockSupport {
 			.andReturn(new RateLimiterImpl(100L));
 		expect(def.getStoryFactory(cx))
 			.andReturn(new MockStoryFactory(cx));
-		expect(def.getPendingRequestHandlerLocator())
+		expect(def.getPendingRequestHandlerLocator(cx))
 			.andReturn(null);
 		replayAll();
 		

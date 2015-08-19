@@ -7,7 +7,9 @@ import net.darylb.stressor.actions.Action;
 import net.darylb.stressor.actions.Props;
 import net.darylb.stressor.switchboard.PendingRequestHandlerLocator;
 import net.darylb.stressor.switchboard.Switchboard;
+import net.darylb.stressor.switchboard.SwitchboardJettyHandler;
 
+import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,8 @@ public abstract class LoadTest {
 	private LoadTestStatus status = LoadTestStatus.PENDING;
 	private PendingRequestHandlerLocator pendingRequestHandlerLocator;
 
+	private Server jetty;
+
 	private LoadTestDefinition def;
 
 	public LoadTest(LoadTestDefinition def, int numThreads) {
@@ -39,14 +43,26 @@ public abstract class LoadTest {
 			cx.setRateLimiter(rateLimiter);
 		}
 		this.storyFactory = getWrappedStoryFactory(def);
-		this.pendingRequestHandlerLocator = def.getPendingRequestHandlerLocator();
+		this.pendingRequestHandlerLocator = def.getPendingRequestHandlerLocator(cx);
 		this.startTime = System.currentTimeMillis() / 1000L;
 		cx.setNumThreads(numThreads);
 
 		this.status = LoadTestStatus.VALIDATING;
 		if(pendingRequestHandlerLocator != null) {
-			Switchboard.getInstance().addLocator(pendingRequestHandlerLocator);
+			Switchboard switchboard = Switchboard.getInstance();
+			switchboard.addLocator(pendingRequestHandlerLocator);
 			cx.put(Props.PENDING_REQUESTS_LOCATOR, pendingRequestHandlerLocator);
+			if(cx.containsKey(Props.JETTY_LISTEN_PORT)) {
+				int listenPort = Integer.parseInt(cx.getProperty(Props.JETTY_LISTEN_PORT));
+				jetty = new Server(listenPort);
+				jetty.setHandler(new SwitchboardJettyHandler(switchboard));
+				try {
+					jetty.start();
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 		try {
 			// do one test as a warmup
@@ -118,6 +134,14 @@ public abstract class LoadTest {
 		finally {
 			if(pendingRequestHandlerLocator != null) {
 				Switchboard.getInstance().removeLocator(pendingRequestHandlerLocator);
+			}
+			if(jetty != null) {
+				try {
+					jetty.stop();
+				}
+				catch (Exception e) {
+					log.error("Error stopping Jetty", e);
+				}
 			}
 		}
 		this.status = LoadTestStatus.COMPLETE;

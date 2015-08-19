@@ -22,15 +22,15 @@ import net.darylb.stressor.switchboard.RequestHandler;
 public class PendingRequestRegisterAction extends Action {
 
 	private final String token;
-	private final RequestHandler responseGenerator;
+	private final RequestHandler requestHandler;
 
-	public PendingRequestRegisterAction(RequestHandler responseGenerator) {
-		this(getNewRandomToken(), responseGenerator);
+	public PendingRequestRegisterAction(RequestHandler requestHandler) {
+		this(getNewRandomToken(), requestHandler);
 	}
 
-	public PendingRequestRegisterAction(String token, RequestHandler responseGenerator) {
+	public PendingRequestRegisterAction(String token, RequestHandler requestHandler) {
 		this.token = token;
-		this.responseGenerator = responseGenerator;
+		this.requestHandler = requestHandler;
 	}
 
 	/**
@@ -44,13 +44,14 @@ public class PendingRequestRegisterAction extends Action {
 	@Override
 	public ActionResult call(LoadTestContext cx) {
 		// put story's semaphore into the context so WaitAction can find it
-		PendingRequestSemaphore semaphore = new PendingRequestSemaphoreImpl(responseGenerator);
+		PendingRequestSemaphore semaphore = new PendingRequestSemaphoreImpl(requestHandler);
 		cx.setStoryObject(Props.STRESSOR_PENDING_CALLBACK_STORY_SEMAPHORE, semaphore);
 		
 		// put pointer from token->semaphore so Switchboard can find it via the test's (possibly custom) PendingRequestHandlerLocator
 		PendingRequestHandlerLocator pendingRequestHandlerLocator = (PendingRequestHandlerLocator)cx.get(Props.PENDING_REQUESTS_LOCATOR);
 		pendingRequestHandlerLocator.register(getToken(), semaphore);
 
+		// in case another action needs the token, we'll put it here
 		cx.setStoryProperty(Props.PENDING_REQUEST_TOKEN, getToken());
 		return null;
 	}

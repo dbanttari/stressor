@@ -66,7 +66,7 @@ public abstract class LoadTestDefinition {
 	 * Or just have it return PendingRequestHandlerLocator
 	 * @return your implementation of a RequestHandlerLocator
 	 */
-	public PendingRequestHandlerLocator getPendingRequestHandlerLocator() {
+	public PendingRequestHandlerLocator getPendingRequestHandlerLocator(LoadTestContext cx) {
 		return null;
 	}
 

@@ -1,43 +1,49 @@
 package net.darylb.stressor.switchboard;
 
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.darylb.stressor.actions.PendingRequestSemaphore;
 
 /**
- * Use this if you're using tokens to create one-off requests using content tokens.
+ * Use this if you're using tokens to create one-off requests using content
+ * tokens.
  * 
  * @author daryl
  *
  */
 public class PendingRequestHandlerLocator implements RequestHandlerLocator {
 
-	HashMap<String, PendingRequestSemaphore> waiting = new HashMap<String, PendingRequestSemaphore>();
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(PendingRequestHandlerLocator.class);
 	
+	// weak hash map won't hold the reference to the key, so if
+	// PendingRequestSemaphore can be collected because the story has completed
+	// (presumably unsuccessfully), this won't prevent that colection.
+	WeakHashMap<String, PendingRequestSemaphore> waiting = new WeakHashMap<String, PendingRequestSemaphore>();
+
 	@Override
 	public RequestHandler handles(Method method, String URI, HttpServletRequest req) {
 		String token = getToken(method, URI, req);
-		if(waiting.containsKey(token)) {
-			PendingRequestSemaphore o;
-			synchronized (waiting) {
-				o = waiting.remove(token);
-			}
-			return o;
+		synchronized (waiting) {
+			return waiting.remove(token);
 		}
-		return null;
 	}
 
-	public void register(String token, PendingRequestSemaphore waiting) {
-		synchronized(this.waiting) {
-			this.waiting.put(token, waiting);
+	public void register(String token, PendingRequestSemaphore semaphore) {
+		synchronized (waiting) {
+			waiting.put(token, semaphore);
 		}
 	}
-	
+
 	/**
-	 * The default implementation extracts the last item of the URI as the token (delimited by / or =)
-	 * If you want to override, 
+	 * The default implementation extracts the last item of the URI as the token
+	 * (delimited by / or =) If you want to override,
+	 * 
 	 * @param method
 	 * @param URI
 	 * @param req
@@ -45,7 +51,7 @@ public class PendingRequestHandlerLocator implements RequestHandlerLocator {
 	 */
 	public static String getToken(Method method, String URI, HttpServletRequest req) {
 		String[] tokens = URI.split("[/=]");
-		return tokens[tokens.length-1];
+		return tokens.length==0 ? null : tokens[tokens.length - 1];
 	}
 
 }

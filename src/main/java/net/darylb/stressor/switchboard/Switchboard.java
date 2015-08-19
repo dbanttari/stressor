@@ -29,7 +29,11 @@ public class Switchboard {
 		// In practice, this should be ROOT.war, for which Tomcat makes the prefix "/",
 		// but for testing within Eclipse this is probably "/stressor" or whatever your Eclipse project name is.
 		String prefix = req.getContextPath();
-		String URI = req.getRequestURI().substring(prefix.length()-1);
+		if(prefix == null) {
+			prefix = "/";
+		}
+		String _URI = req.getRequestURI();
+		String URI = _URI.substring(prefix.length()-1);
 		log.debug("{} request for {}", method, URI);
 		boolean found = false;
 		LinkedList<RequestHandlerLocator> locators;
