@@ -69,7 +69,7 @@ public class LoadTestContext extends Properties {
 	public void newStory() {
 		// make sure the new story gets new story properties and cleanup actions every time
 		storyProperties.set(new HashMap<String,Object>());
-		storyCleanupActions = new LinkedHashMap<String, Action>();
+		storyCleanupActions.set(new LinkedHashMap<String, Action>());
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class LoadTestContext extends Properties {
 	}
 	
 	/**** Auto Cleanup ****/
-	private LinkedHashMap<String, Action> storyCleanupActions;
+	private ThreadLocal<LinkedHashMap<String, Action>> storyCleanupActions = new ThreadLocal<LinkedHashMap<String, Action>>();
 	/**
 	 * If you have an action that needs an end-of-story "finally" action to clean up, you
 	 * can register the action here, and they will be run (in order of appearance) at the
@@ -208,10 +208,10 @@ public class LoadTestContext extends Properties {
 	 * @param cleanupAction
 	 */
 	public void registerStoryCleanupAction(String uniqueKey, Action cleanupAction) {
-		storyCleanupActions.put(uniqueKey, cleanupAction);
+		storyCleanupActions.get().put(uniqueKey, cleanupAction);
 	}
 	public Collection<Action> getStoryCleanupActions() {
-		return storyCleanupActions.values();
+		return storyCleanupActions.get().values();
 	}
 	
 	private LinkedHashMap<String, Action> cleanupActions = new LinkedHashMap<String, Action>();

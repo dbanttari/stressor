@@ -45,7 +45,6 @@ public abstract class LoadTest {
 		this.storyFactory = getWrappedStoryFactory(def);
 		this.pendingRequestHandlerLocator = def.getPendingRequestHandlerLocator(cx);
 		this.startTime = System.currentTimeMillis() / 1000L;
-		cx.setNumThreads(numThreads);
 
 		this.status = LoadTestStatus.VALIDATING;
 		if(pendingRequestHandlerLocator != null) {

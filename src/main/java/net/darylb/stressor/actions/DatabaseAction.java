@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import net.darylb.stressor.LoadTestContext;
@@ -20,6 +23,8 @@ import net.darylb.stressor.LoadTestContext;
  */
 public abstract class DatabaseAction extends Action {
 
+	private static final Logger log = LoggerFactory.getLogger(DatabaseAction.class);
+	
 	private static final String DATABASE_POOL_KEY = "DEFAULT_DB_POOL";
 	private static final String DATABASE_CLEANUP_KEY = "DEFAULT_DB_CLEANUP";
 	private static final String DATABASE_CONNECTION_KEY = "DATABASE_STORY_CONNECTION";
@@ -111,6 +116,8 @@ public abstract class DatabaseAction extends Action {
 	public abstract ActionResult call(LoadTestContext cx, Connection connection) throws SQLException;
 
 	private ComboPooledDataSource createPool(int numThreads) {
+		int poolSize = Math.min(20, 10+numThreads*2);
+		log.info("Creating pool for {} with {} threads (size {})", jdbcUrl, numThreads, poolSize);
 		ComboPooledDataSource pool = new ComboPooledDataSource();
 		try {
 			pool.setDriverClass(driverClass);
@@ -123,10 +130,10 @@ public abstract class DatabaseAction extends Action {
 			pool.setUser(username);
 			pool.setPassword(password);
 		}
-		pool.setMaxPoolSize(10+numThreads*3);
-		pool.setMaxStatements(10+numThreads*3);
+		pool.setMaxPoolSize(poolSize);
+		pool.setMaxStatements(poolSize);
 		pool.setMaxStatementsPerConnection(10);
-		pool.setMinPoolSize(numThreads);
+		pool.setMinPoolSize(Math.min(20, numThreads));
 		return pool;
 	}
 	

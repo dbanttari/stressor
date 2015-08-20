@@ -21,6 +21,7 @@ public class DatabaseCloseConnectionAction extends Action {
 	@Override
 	public ActionResult call(LoadTestContext cx) {
 		try {
+			// log.info("Closing connection");
 			connection.close();
 		}
 		catch (SQLException e) {
