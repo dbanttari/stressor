@@ -45,10 +45,6 @@ public class PendingRequestSemaphoreTest extends EasyMockSupport {
 			.atLeastOnce();
 		expect(mockRequest.getContextPath())
 			.andReturn("/");
-		mockResponse.setStatus(200);
-		mockResponse.setContentType("text/plain");
-		expect(mockResponse.getOutputStream())
-			.andReturn(mockServletOutputStream);
 		responseGenerator.handle(Method.GET, uri, mockRequest, mockResponse);
 		replayAll();
 
