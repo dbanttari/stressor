@@ -10,7 +10,7 @@ Installation
 ------------
 - Check out [stressor] into your workspace:
 ```
-git checkout https://github.com/dbanttari/stressor.git
+git clone https://github.com/dbanttari/stressor.git
 ```
 - Import the Stressor artifact into your local Maven repo by running `./build.sh` in the Stressor directory
 - Create your own implementation project, and add [stressor] to its build path.  In [Maven], you might add this:
